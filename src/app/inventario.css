@@ -1,0 +1,44 @@
+#unibe-footer {
+    background-color: #0f172a !important; /* Azul medianoche muy oscuro */
+    color: #ffffff !important;
+    margin-top: 50px;
+    padding: 60px 20px 30px 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    border-top: 4px solid #0056b3; /* Línea decorativa azul UNIBE */
+}
+
+#unibe-footer h4 {
+    color: #38bdf8 !important; /* Azul claro para títulos */
+    border-bottom: 2px solid #1e293b;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+#unibe-footer .footer-link {
+    color: #94a3b8 !important;
+    text-decoration: none;
+    transition: 0.3s;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 10px;
+    display: block;
+    text-align: left;
+}
+
+#unibe-footer .footer-link:hover {
+    color: #ffffff !important;
+}
+
+#unibe-footer .status-box {
+    background-color: #1e293b !important;
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid #334155;
+}
+
+#unibe-footer .alerta-vencido {
+    color: #ff4d4d !important; /* Rojo vibrante para resaltar los 5 vencidos */
+    font-weight: bold;
+}

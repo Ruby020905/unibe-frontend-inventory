@@ -1,0 +1,638 @@
+<div class="relative min-h-screen p-4 md:p-8 overflow-hidden font-sans">
+  
+  <div class="fixed inset-0 z-0">
+    <img src="https://images.unsplash.com/photo-1585435557343-3b092031a831?q=80&w=2000" 
+         class="w-full h-full object-cover blur-2xl opacity-30 scale-110" alt="Fondo Médico">
+    <div class="absolute inset-0 bg-gradient-to-tr from-white via-white/80 to-[#005596]/10"></div>
+  </div>
+
+  <nav class="relative z-50 max-w-7xl mx-auto mb-6">
+    <div class="bg-white/60 backdrop-blur-lg border border-white/40 shadow-sm rounded-2xl px-6 py-3 flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <span class="text-[10px] font-black text-[#005596] uppercase tracking-[0.2em]">Sistema UNIBE</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3 pr-4 border-r border-gray-200">
+          <div class="text-right hidden sm:block">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Sesión activa</p>
+            <p class="text-xs font-black text-[#005596]">{{ usuarioActivo }}</p>
+          </div>
+          <div class="w-8 h-8 rounded-full bg-[#005596] text-white flex items-center justify-center font-bold text-xs shadow-md uppercase">
+            {{ usuarioActivo.charAt(0) }}
+          </div>
+        </div>
+        <button (click)="logout()" class="text-red-500 hover:text-red-700 font-bold text-xs uppercase">Salir</button>
+      </div>
+    </div>
+  </nav>
+
+  <div *ngIf="vistaActual === 'resumen'" class="relative z-10 max-w-7xl mx-auto animate-in fade-in duration-500 space-y-8">
+    
+    <div class="bg-[#005596] rounded-[2rem] p-8 text-white shadow-2xl relative overflow-hidden">
+      <div class="relative z-10">
+        <h2 class="text-3xl font-black uppercase tracking-tighter">Bienvenido {{ usuarioActivo }}</h2>
+        <p class="opacity-80 font-medium uppercase text-xs tracking-widest mt-1">Estado actual de la Unidad Médica - UNIBE</p>
+      </div>
+      <div class="absolute right-[-20px] top-[-20px] opacity-10 text-[10rem]">🏥</div>
+    </div>
+
+    
+
+<div class="grid gap-4">
+    <div *ngIf="alertas.vencidos > 0" class="flex items-center justify-between p-6 rounded-3xl bg-red-50/90 border-l-8 border-red-600 shadow-xl backdrop-blur-md">
+      <div class="flex items-center gap-5">
+        <span class="text-4xl">🚨</span>
+        <div>
+          <h3 class="font-black text-red-900 uppercase text-lg leading-tight">Aviso de Caducidad</h3>
+          <p class="text-red-700 font-medium">Hay <b>{{ alertas.vencidos }}</b> productos vencidos.</p>
+        </div>
+      </div>
+      <button (click)="filtrarYVer('vencidos')" class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-xl font-bold text-sm transition-all shadow-lg active:scale-95">
+        Ver Caducados
+      </button>
+    </div>
+
+    <div *ngIf="alertas.proximos > 0" class="flex items-center justify-between p-6 rounded-3xl bg-yellow-50/90 border-l-8 border-yellow-500 shadow-xl backdrop-blur-md">
+      <div class="flex items-center gap-5">
+        <span class="text-4xl">⚠️</span>
+        <div>
+          <h3 class="font-black text-yellow-900 uppercase text-lg leading-tight">Próximos a Vencer</h3>
+          <p class="text-yellow-700 font-medium">Hay <b>{{ alertas.proximos }}</b> productos por caducar.</p>
+        </div>
+      </div>
+      <button (click)="filtrarYVer('proximos')" class="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-xl font-bold text-sm transition-all shadow-lg active:scale-95">
+        Ver Próximos
+      </button>
+    </div>
+  </div>
+  <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div (click)="filtrarYVer('vencidos')" class="cursor-pointer bg-red-600 rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden group transition-transform hover:scale-[1.02]">
+      <h4 class="text-sm font-black uppercase tracking-[0.2em] opacity-80">Medicamentos Vencidos</h4>
+      <p class="text-9xl font-black mt-4 tracking-tighter">{{ alertas.vencidos }}</p>
+      <span class="absolute right-[-20px] bottom-[-20px] text-[12rem] opacity-20 rotate-12 transition-transform group-hover:scale-110">☠️</span>
+    </div>
+
+    <div (click)="filtrarYVer('proximos')" class="cursor-pointer bg-white rounded-[3rem] p-10 shadow-2xl border-b-[15px] border-[#ffcc00] relative overflow-hidden group transition-transform hover:scale-[1.02]">
+      <h4 class="text-sm font-black uppercase tracking-[0.2em] text-gray-400">Próximos a Vencer</h4>
+      <p class="text-9xl font-black text-[#005596] mt-4 tracking-tighter">{{ alertas.proximos }}</p>
+      <span class="absolute right-[-10px] bottom-[-10px] text-[12rem] opacity-5 rotate-12 transition-transform group-hover:scale-110">⏳</span>
+    </div>
+  </div>-->
+<!-- <div *ngIf="filtroActual !== 'todos'" class="mb-4 flex items-center gap-2">
+  <span class="text-xs font-bold text-gray-500 uppercase">Filtro activo: </span>
+  <span class="px-3 py-1 bg-blue-100 text-[#005596] rounded-full text-[10px] font-black uppercase">
+    {{ filtroActual }}
+  </span>
+  <button (click)="setFiltro('todos')" class="text-xs text-red-500 underline font-bold ml-2">
+    Quitar Filtro
+  </button>
+</div>  -->
+  <div class="flex justify-center pt-10">
+    <button (click)="irAGestion()" class="bg-[#005596] hover:bg-[#ffcc00] hover:text-[#005596] text-white px-12 py-5 rounded-[2rem] font-black text-lg shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center gap-4">
+      GESTIONAR INVENTARIO COMPLETO ➜
+    </button>
+  </div>
+</div>
+  <div *ngIf="vistaActual === 'tabla'" class="relative z-10 max-w-7xl mx-auto animate-in slide-in-from-bottom-10 duration-700">
+    
+    <button (click)="vistaActual = 'resumen'" class="mb-6 text-[#005596] font-black text-xs uppercase tracking-widest flex items-center gap-2 hover:translate-x-[-5px] transition-transform">
+      ⬅ Volver al Resumen
+    </button>
+
+   <header class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 bg-white/40 backdrop-blur-md p-6 rounded-[2.5rem] border border-white/50 shadow-sm">
+      <div class="flex items-center gap-5">
+        <div class="bg-white p-3 rounded-2xl shadow-sm">
+          <img src="logo-unibe.png" class="h-16 w-16 object-contain" alt="UNIBE">
+        </div>
+        <div>
+          <h1 class="text-4xl font-black text-[#005596] tracking-tighter uppercase">Inventario</h1>
+          <p class="text-gray-500 font-bold text-xs uppercase tracking-widest flex items-center gap-2">
+            <span class="w-2 h-2 bg-green-500 rounded-full"></span> Panel Operativo
+          </p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <button (click)="exportarExcel()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-2xl font-bold shadow-lg transition-all active:scale-95">📊 Exportar</button>
+        <button (click)="abrirModal()" class="bg-[#005596] hover:bg-[#ffcc00] hover:text-[#005596] text-white px-6 py-3 rounded-2xl font-bold shadow-lg transition-all active:scale-95">
+          ➕ Agregar Medicamento
+        </button>
+      </div>
+    </header>
+   
+    <div class="flex flex-col md:flex-row items-center justify-between mb-8 gap-4 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
+  <h2 class="text-2xl font-black text-[#005596] tracking-tight">Gestión de Inventario</h2>
+
+  <div class="relative w-full md:w-1/3 group">
+    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+      <svg class="h-5 w-5 text-gray-400 group-focus-within:text-[#005596] transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+    </div>
+   <input 
+  type="text" 
+  [(ngModel)]="filtroNombre" 
+  placeholder="Buscar medicamento por nombre..." 
+  class="w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-gray-100 bg-gray-50 font-bold text-gray-700 outline-none focus:border-[#005596] focus:bg-white focus:shadow-2xl transition-all"
+>
+  </div>
+  <div class="flex items-center gap-2 mb-4 ml-2">
+  <span class="px-3 py-1 bg-blue-100 text-[#005596] rounded-full text-xs font-black uppercase">
+    {{ medicamentosFiltrados.length }} Resultados encontrados
+  </span>
+  
+  <!-- <span *ngIf="filtroNombre" class="text-xs text-gray-400 italic">
+    Filtrando por: "{{ filtroNombre }}"
+  </span> -->
+</div>
+</div>
+
+
+   <div class="bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-2xl border border-white overflow-hidden flex flex-col min-h-[400px]">
+  
+  <div class="flex-grow overflow-x-auto">
+    <table class="min-w-full">
+      <thead>
+        <tr class="bg-[#005596] text-white">
+          <th class="px-6 py-5 text-left text-xs font-black uppercase tracking-widest">Medicamento</th>
+          <th class="px-6 py-5 text-left text-xs font-black uppercase tracking-widest">Clase</th>
+          <th class="px-6 py-5 text-center text-xs font-black uppercase tracking-widest">Presentación</th>
+          <th class="px-6 py-5 text-center text-xs font-black uppercase tracking-widest">Unidad</th>
+          <th class="px-6 py-5 text-center text-xs font-black uppercase tracking-widest">Cantidad</th>
+          <th class="px-6 py-5 text-left text-xs font-black uppercase tracking-widest">Imagen</th>
+          <th class="px-6 py-5 text-left text-xs font-black uppercase tracking-widest">Ingreso</th>
+          <th class="px-6 py-5 text-left text-xs font-black uppercase tracking-widest">Salida</th>
+          <th class="px-6 py-5 text-left text-xs font-black uppercase tracking-widest">Estado</th>
+          <th class="px-6 py-5 text-left text-xs font-black uppercase tracking-widest">Caducidad</th>
+          <th class="px-6 py-4 text-center">Acciones</th>
+        </tr>
+      </thead>
+      
+      <tbody class="divide-y divide-gray-100 bg-white/50">
+        <tr *ngIf="medicamentosFiltrados.length === 0">
+          <td colspan="11" class="py-20 text-center">
+            <div class="flex flex-col items-center justify-center opacity-40">
+              <span class="text-5xl mb-4">🔍</span>
+              <p class="text-lg font-bold text-gray-800 uppercase">No hay registros</p>
+            </div>
+          </td>
+        </tr>
+
+        <tr *ngFor="let m of medicamentosPaginados" class="hover:bg-blue-50/50 transition-colors group">
+          <td class="px-6 py-5 font-bold text-gray-800">{{ m.nombre }}</td>
+          <td class="px-6 py-5 text-sm text-gray-500 font-medium">{{ m.tipo }}</td>
+          <td class="px-6 py-5 text-center font-black text-[#005596]">{{ m.presentacion }}</td>
+          <td class="px-6 py-5 text-center font-black text-[#005596]">{{ m.unidad }}</td>
+          <td class="px-6 py-5 text-center font-black text-[#005596]">{{ m.cantidad }}</td>
+          <td class="px-6 py-5 text-sm text-blue-400 truncate max-w-[100px]">{{ m.imagen }}</td>
+          <td class="px-6 py-5 font-bold text-sm text-gray-700">{{ m.fechaIngreso | date:'dd/MM/yyyy' }}</td>
+          <td class="px-6 py-5 font-bold text-sm text-gray-400">{{ m.fechaSalida | date:'dd/MM/yyyy' }}</td>
+          <td class="px-6 py-5">
+            <span class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase"
+                  [ngClass]="color(m) === 'red' ? 'bg-red-100 text-red-600' : (color(m) === 'orange' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700')">
+              {{ color(m) === 'red' ? 'Vencido' : (color(m) === 'orange' ? 'Crítico' : 'Seguro') }}
+            </span>
+          </td>
+          <td class="px-6 py-5 font-bold text-sm" [ngClass]="color(m) === 'red' ? 'text-red-600' : 'text-gray-700'">
+            {{ m.fechaCaducidad | date:'dd/MM/yyyy' }}
+          </td>
+          <td class="px-6 py-5">
+            <div class="flex items-center justify-center gap-3">
+              <button (click)="editarMedicamento(m)" class="p-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-[#005596] hover:text-white transition-all shadow-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+              <button (click)="prepararEliminar(m)" class="p-2.5 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flex items-center justify-between px-8 py-5 bg-white border-t border-gray-100 shrink-0 mt-auto">
+    <p class="text-[11px] text-gray-400 font-black uppercase tracking-widest">
+      Página <span class="text-[#005596]">{{ paginaActual }}</span> de {{ totalPaginas }}
+    </p>
+
+    <div class="inline-flex gap-3 items-center">
+      <button (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1"
+              class="p-3 rounded-2xl border border-gray-200 hover:bg-gray-50 disabled:opacity-20 transition-all shadow-sm">
+        <svg class="w-5 h-5 text-[#005596]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" /></svg>
+      </button>
+
+      <div class="flex gap-2">
+        <button *ngFor="let p of [].constructor(totalPaginas); let i = index"
+                (click)="cambiarPagina(i + 1)"
+                [class]="(i + 1) === paginaActual ? 'bg-[#005596] text-white shadow-lg scale-110' : 'text-gray-400 hover:bg-gray-100 border border-gray-50'"
+                class="w-11 h-11 rounded-2xl font-black text-xs transition-all">
+          {{ i + 1 }}
+        </button>
+      </div>
+
+      <button (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas"
+              class="p-3 rounded-2xl border border-gray-200 hover:bg-gray-50 disabled:opacity-20 transition-all shadow-sm">
+        <svg class="w-5 h-5 text-[#005596]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+      </button>
+    </div>
+  </div>
+</div>
+<!-- Agregar Medicamento -->
+ <div *ngIf="mostrarModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-md animate-in fade-in duration-300">
+  
+  <div class="absolute inset-0 bg-[#005596]/60 transition-opacity" (click)="cerrarModal()"></div>
+  
+  <div class="relative bg-white w-full max-w-6xl rounded-[3.5rem] shadow-[0_35px_60px_-15px_rgba(0,0,0,0.3)] overflow-hidden animate-in zoom-in-95 duration-300">
+    
+    <div class="h-2 w-full bg-gradient-to-r from-[#005596] via-[#ffcc00] to-[#005596]"></div>
+
+    <div class="p-8 md:p-14 overflow-y-auto max-h-[90vh]">
+      
+      <div class="flex justify-between items-center mb-12 border-b border-gray-50 pb-8">
+        <div class="flex items-center gap-4">
+          <div class="bg-blue-50 p-3 rounded-2xl">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-[#005596]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div>
+            
+            <h2 class="text-4xl font-black text-[#005596] uppercase">
+  {{ nuevo.id ? 'Actualizar Medicamento' : 'Nuevo Registro' }}
+</h2>
+<div *ngIf="!formularioValido()" class="mb-2 animate__animated animate__fadeIn">
+    <span class="text-[10px] font-black text-blue-900/40 uppercase tracking-[0.2em] bg-gray-50 px-4 py-2 rounded-full border border-gray-100">
+      {{ obtenerMotivoBloqueo() }}
+    </span>
+  </div>
+            <p class="text-gray-400 font-bold text-[10px] uppercase tracking-[0.3em] mt-2">Gestión de Inventario Médico</p>
+          </div>
+        </div>
+        <button (click)="cerrarModal()" class="text-gray-300 hover:text-red-500 transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <form (submit)="$event.preventDefault()" (ngSubmit)="guardar()" #f="ngForm" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-8">
+        
+       <div class="space-y-2 group">
+  <label class="text-[11px] font-black text-blue-900/40 uppercase tracking-widest ml-2 group-focus-within:text-[#005596] transition-colors">
+    Medicamento
+  </label>
+  
+  <input 
+  [(ngModel)]="nuevo.nombre" 
+  name="nombre" 
+  list="listaMedicamentos"
+  (change)="autoCompletar()" 
+  required 
+  placeholder="Escriba o seleccione..."
+  class="w-full p-4 rounded-2xl border-2 border-gray-100 bg-gray-50 font-bold text-gray-700 outline-none focus:border-[#005596] focus:bg-white focus:shadow-xl transition-all"
+>
+
+  <datalist id="listaMedicamentos">
+    <option *ngFor="let n of nombresMedicamentos" [value]="n">{{ n }}</option>
+  </datalist>
+</div>
+<div class="space-y-2 group">
+  <label class="text-[11px] font-black text-blue-900/40 uppercase tracking-widest ml-2 group-focus-within:text-[#005596] transition-colors">
+    Clase de Medicamento
+  </label>
+  
+<input 
+  [(ngModel)]="nuevo.tipo" 
+  name="tipo" 
+  list="listaTipos"
+  (change)="autoCompletar()" 
+  required 
+  placeholder="Escriba o seleccione..."
+  class="w-full p-4 rounded-2xl border-2 border-gray-100 bg-gray-50 font-bold text-gray-700 outline-none focus:border-[#005596] focus:bg-white focus:shadow-xl transition-all"
+>
+
+  <datalist id="listaTipos">
+    <option *ngFor="let t of tiposMedicamentos" [value]="t">{{ t }}</option>
+  </datalist>
+</div>
+
+       <div class="space-y-2 group">
+  <label class="text-[11px] font-black text-blue-900/40 uppercase tracking-widest ml-2 group-focus-within:text-[#005596] transition-colors">
+    Presentación
+  </label>
+  <input 
+    [(ngModel)]="nuevo.presentacion" 
+    name="presentacion" 
+    list="listaPresentaciones"
+    required 
+    placeholder="Ej: Tabletas, Frasco..."
+    class="w-full p-4 rounded-2xl border-2 border-gray-100 bg-gray-50 font-bold text-gray-700 outline-none focus:border-[#005596] focus:bg-white focus:shadow-xl transition-all"
+  >
+  <datalist id="listaPresentaciones">
+    <option *ngFor="let p of presentacionesMedicamentos" [value]="p">{{ p }}</option>
+  </datalist>
+</div>
+
+<div class="space-y-2 group">
+  <label class="text-[11px] font-black text-blue-900/40 uppercase tracking-widest ml-2 group-focus-within:text-[#005596] transition-colors">
+    Unidad
+  </label>
+  <input 
+    [(ngModel)]="nuevo.unidad" 
+    name="unidad" 
+    list="listaUnidades"
+    required 
+    placeholder="Ej: MG, ML, G..."
+    class="w-full p-4 rounded-2xl border-2 border-gray-100 bg-gray-50 font-bold text-gray-700 outline-none focus:border-[#005596] focus:bg-white focus:shadow-xl transition-all"
+  >
+  <datalist id="listaUnidades">
+    <option *ngFor="let u of unidades" [value]="u">{{ u }}</option>
+  </datalist>
+</div>
+
+        <div class="space-y-2 group">
+          <label class="text-[11px] font-black text-blue-900/40 uppercase tracking-widest ml-2 group-focus-within:text-[#005596] transition-colors">Cantidad</label>
+          <input type="number" [(ngModel)]="nuevo.cantidad" name="cantidad" required min="1" 
+            class="w-full p-4 rounded-2xl border-2 border-gray-100 bg-gray-50 font-bold text-[#005596] outline-none focus:border-[#005596] focus:bg-white focus:shadow-xl transition-all">
+        </div>
+
+        <div class="space-y-2 group">
+          <label class="text-[11px] font-black text-blue-900/40 uppercase tracking-widest ml-2 group-focus-within:text-[#005596] transition-colors">Imagen URL</label>
+          <input type="text" [(ngModel)]="nuevo.imagen" name="imagen" placeholder="https://..."
+            class="w-full p-4 rounded-2xl border-2 border-gray-100 bg-gray-50 font-bold outline-none focus:border-[#005596] focus:bg-white focus:shadow-xl transition-all">
+        </div>
+
+        <div class="space-y-2 group">
+    <label class="text-[11px] font-black text-blue-900/40 uppercase tracking-widest ml-2 italic">📅 Ingreso</label>
+    <input type="date" [(ngModel)]="nuevo.fechaIngreso" name="fechaIngreso" required 
+      class="w-full p-4 rounded-2xl border-2 border-gray-100 bg-white font-bold text-gray-700 outline-none focus:border-[#005596] focus:shadow-xl transition-all">
+  </div>
+
+ <div class="space-y-2 group">
+  <label class="text-[11px] font-black text-blue-900/40 uppercase tracking-widest ml-2 italic">📅 Salida</label>
+  <input type="date" [(ngModel)]="nuevo.fechaSalida" name="fechaSalida" 
+    [class]="salidaInvalida ? 
+             'w-full p-4 rounded-2xl border-2 border-orange-200 bg-orange-50 font-black text-orange-600 outline-none' : 
+             'w-full p-4 rounded-2xl border-2 border-gray-100 bg-white font-bold text-gray-400 outline-none focus:border-gray-300'">
+  
+  <div *ngIf="salidaInvalida" 
+       class="mt-2 flex items-center gap-2 p-3 bg-orange-100 border border-orange-200 rounded-xl animate__animated animate__headShake">
+    <svg class="h-5 w-5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+    <span class="text-[10px] font-black text-orange-700 uppercase leading-tight">
+      Error: La salida no puede ser posterior a la caducidad.
+    </span>
+  </div>
+</div>
+
+  <div class="space-y-2 group lg:scale-105 transition-transform">
+    <label class="text-[11px] font-black text-red-600 uppercase tracking-widest ml-2 flex items-center gap-1">
+      <span class="animate-pulse">⚠️</span> Caducidad
+    </label>
+    <input type="date" [(ngModel)]="nuevo.fechaCaducidad" name="fechaCaducidad" [min]="nuevo.fechaIngreso" required 
+      class="w-full p-4 rounded-2xl border-2 border-red-100 bg-red-50 font-black text-red-600 outline-none focus:ring-4 focus:ring-red-100 transition-all shadow-inner">
+    
+    <div *ngIf="nuevo.fechaIngreso && nuevo.fechaCaducidad && nuevo.fechaCaducidad <= nuevo.fechaIngreso" 
+         class="mt-2 flex items-center gap-2 p-3 bg-red-100 border border-red-200 rounded-xl animate__animated animate__headShake">
+      <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+      <span class="text-[10px] font-black text-red-700 uppercase leading-tight">
+        Error: La caducidad no puede ser anterior o igual al ingreso.
+      </span>
+    </div>
+  </div>
+
+      <div *ngIf="esDuplicado" 
+     class="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl animate__animated animate__pulse animate__infinite">
+  <div class="flex items-center gap-3">
+    <span class="text-2xl">ℹ️</span>
+    <div class="flex flex-col">
+      <span class="text-[11px] font-black text-blue-800 uppercase italic">Lote ya existente</span>
+      <p class="text-[10px] font-medium text-blue-600">
+        Ya existe "{{nuevo.nombre}}" con caducidad {{nuevo.fechaCaducidad | date:'dd/MM/yyyy'}}. 
+        Por favor, **actualice el registro existente** en la tabla.
+      </p>
+    </div>
+  </div>
+</div>
+
+
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-10 gap-y-4">
+    </div>
+
+  <div class="mt-4 flex flex-col items-center justify-center w-full">
+    
+    <div class="w-full max-w-sm flex flex-col items-center gap-3">
+    
+      <button *ngIf="!nuevo.id" 
+        type="submit" 
+        [disabled]="!formularioValido()"
+        class="w-full py-5 bg-[#005596] text-white rounded-[2.5rem] font-black uppercase text-xl shadow-xl transition-all disabled:opacity-30 disabled:grayscale">
+  {{ esDuplicado ? 'LOTE DUPLICADO' : 'GUARDAR REGISTRO' }}
+</button> 
+
+    <button *ngIf="nuevo.id" 
+            type="button" 
+            (click)="actualizarMedicamento()" 
+            [disabled]="!formularioValido()"
+            class="w-full py-5 bg-[#ffcc00] text-[#005596] rounded-[2.5rem] font-black uppercase text-xl shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95">
+      Confirmar Actualización
+    </button>
+
+    <button (click)="cerrarModal()" type="button" class="text-gray-400 font-bold uppercase tracking-widest text-[11px] hover:text-red-500 transition-colors">
+      CANCELAR Y VOLVER
+    </button>
+    </div>
+  </div>
+ 
+
+      </form>
+      
+    </div>
+  </div>
+</div>
+<style>
+  .unibe-footer-container {
+    background-color: #001f3f !important; /* Azul marino muy oscuro y sólido */
+    color: #ffffff !important;
+    padding: 60px 20px 40px 20px !important;
+    margin-top: 100px !important;
+    display: block !important;
+    width: 100% !important;
+    position: relative !important;
+    z-index: 999 !important;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.3) !important;
+  }
+  .unibe-footer-container h4 {
+    color: #00d4ff !important; /* Celeste brillante para títulos */
+    font-weight: bold !important;
+    margin-bottom: 20px !important;
+    border-bottom: 2px solid #003366 !important;
+    padding-bottom: 10px !important;
+  }
+  .unibe-footer-container button {
+    background: none !important;
+    border: none !important;
+    color: #e0e0e0 !important;
+    cursor: pointer !important;
+    display: block !important;
+    margin-bottom: 12px !important;
+    font-size: 15px !important;
+    text-align: left !important;
+  }
+  .unibe-footer-container .status-card {
+    background: #001529 !important; /* Fondo aún más oscuro para el estado */
+    padding: 20px !important;
+    border-radius: 12px !important;
+    border: 1px solid #003366 !important;
+  }
+</style>
+
+<footer class="unibe-footer-container">
+  <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
+    
+    <div>
+      <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px;">
+        <img src="logo-unibe.png" style="height: 45px; background: white; padding: 5px; border-radius: 8px;">
+        <span style="font-size: 1.6rem; font-weight: 900; color: #ffffff !important;">SISTEMA UNIBE</span>
+      </div>
+      <p style="color: #cbd5e1 !important; line-height: 1.6;">
+        Gestión integral de la Unidad Médica UNIBE. <br>
+        Monitoreo activo de caducidades e insumos 2026.
+      </p>
+    </div>
+
+    <div>
+      <h4>Accesos Rápidos</h4>
+      <button (click)="vistaActual = 'resumen'">🏠 Dashboard Principal</button>
+      <button (click)="irAGestion()">📦 Gestión de Inventario</button>
+      <button (click)="exportarExcel()" style="color: #00d4ff !important; font-weight: bold !important;">📊 Descargar KARDEX 2026</button>
+    </div>
+
+    <div>
+      <h4>Estado del Sistema</h4>
+      <div class="status-card">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+          <div style="width: 12px; height: 12px; background: #00ff00; border-radius: 50%; box-shadow: 0 0 10px #00ff00;"></div>
+          <span style="font-size: 1rem;">Servidor: Operativo</span>
+        </div>
+        <p style="color: #ff4d4d !important; font-weight: 900; font-size: 1.1rem; margin: 0;">
+          ⚠️ {{ alertas.vencidos }} Productos Vencidos
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <div style="text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #003366; color: #64748b !important; font-size: 0.8rem;">
+    © 2026 Universidad Iberoamericana UNIBE. Todos los derechos reservados. <br>
+    Quito, Ecuador
+  </div>
+</footer>
+<div *ngIf="mostrarModalEliminar" 
+     class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+  
+  <div class="bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden transform transition-all p-8 border border-gray-100">
+    
+    <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-50 mb-6">
+      <svg class="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+    </div>
+
+    <div class="text-center mb-8">
+      <h3 class="text-2xl font-black text-[#005596] mb-3">¿Eliminar Registro?</h3>
+      <p class="text-gray-500 leading-relaxed">
+        Estás a punto de borrar <span class="font-bold text-red-600 underline">{{ medicamentoAEliminar?.nombre }}</span>. 
+        Esta acción es permanente y afectará el conteo de inventario.
+      </p>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <button (click)="confirmarEliminacion()" 
+              class="w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-red-200 transition-all active:scale-95">
+        Sí, eliminar definitivamente
+      </button>
+      
+      <button (click)="cerrarModalEliminar()" 
+        class="w-full py-4 bg-gray-50 hover:bg-gray-100 text-gray-400 rounded-2xl font-bold transition-all">
+  No, mantener registro
+      </button>
+    </div>
+  </div>
+</div>
+<div *ngIf="mostrarToast" 
+     class="fixed bottom-10 right-10 z-[200] flex items-center p-4 min-w-[300px] rounded-2xl shadow-2xl transition-all duration-500 transform animate-bounce-short"
+     [ngClass]="tipoToast === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-600 text-white'">
+  
+  
+  <div class="mr-3 p-2 bg-white/20 rounded-lg">
+    <svg *ngIf="tipoToast === 'success'" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+    </svg>
+    <svg *ngIf="tipoToast === 'error'" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  </div>
+
+  <div>
+    <p class="text-xs font-black uppercase tracking-widest opacity-80">Notificación</p>
+    <p class="font-bold">{{ mensajeToast }}</p>
+  </div>
+</div>
+<!-- <div *ngIf="mostrarModal" class="fixed inset-0 z-[150] flex items-center justify-center bg-blue-900/40 backdrop-blur-sm p-4">
+  <div class="bg-white w-full max-w-2xl rounded-[3rem] p-10 shadow-2xl border-t-[10px] border-[#005596]">
+
+    <div *ngIf="!confirmandoEdicion">
+      <h2 class="text-3xl font-black text-[#005596] mb-8 uppercase tracking-tighter">Editar Medicamento</h2>
+      
+      <form #f="ngForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        </form>
+
+      <div class="mt-10 flex justify-center">
+        <button (click)="confirmandoEdicion = true" 
+                class="px-10 py-4 bg-[#005596] text-white rounded-2xl font-black uppercase">
+          Revisar Cambios
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="confirmandoEdicion" class="animate__animated animate__fadeIn">
+      <div class="text-center mb-8">
+        <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+          <svg class="h-10 w-10 text-[#005596]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </div>
+
+        <h3 class="text-2xl font-black text-[#005596] mb-3">¿Actualizar Registro?</h3>
+        <p class="text-gray-500 leading-relaxed">
+          Estás a punto de modificar los datos de <span class="font-bold text-[#005596] underline">{{ nuevo?.nombre }}</span>. 
+          Esta acción actualizará la información en el inventario 2026.
+        </p>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <button (click)="confirmarActualizacion()" 
+                class="w-full py-4 bg-[#005596] hover:bg-[#00447a] text-white rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-blue-200 transition-all active:scale-95">
+          Sí, confirmar cambios
+        </button>
+        
+        <button (click)="confirmandoEdicion = false" 
+                class="w-full py-4 bg-gray-50 hover:bg-gray-100 text-gray-400 rounded-2xl font-bold transition-all">
+          No, volver al formulario
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div> -->
+</div>

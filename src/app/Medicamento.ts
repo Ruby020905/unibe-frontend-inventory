@@ -5,6 +5,7 @@ export interface Medicamento {
   presentacion: string;
   unidad: string;
   cantidad: number;
+  imagen: string;
   fechaIngreso: string;
   fechaSalida: string;
   fechaCaducidad: string;
