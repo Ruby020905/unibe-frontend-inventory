@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Medicamento } from './Medicamento';
@@ -17,11 +17,15 @@ import Swal from 'sweetalert2';
 })
 export class Inventario implements OnInit {
 
+
+@ViewChild('cantidadInput') cantidadField!: ElementRef; 
+  resaltarCantidad: boolean = false;
+
   confirmandoEdicion: boolean = false;
   mostrarToast: boolean = false;
 mensajeToast: string = '';
-tipoToast: 'success' | 'error' = 'success';
-vistaActual: 'resumen' | 'tabla' | 'formulario' = 'resumen';
+tipoToast: 'success' | 'error' | 'info' = 'success';
+vistaActual: 'resumen' | 'tabla' = 'resumen';
 mostrarModalEliminar: boolean = false;
 medicamentoAEliminar: any = null;
   usuarioActivo: string = 'Invitado';
@@ -272,16 +276,15 @@ confirmarEliminacion() {
     });
   }
 }
-  lanzarToast(mensaje: string, tipo: 'success' | 'error' = 'success') {
+ lanzarToast(mensaje: string, tipo: 'success' | 'error' | 'info' = 'success') {
   this.mensajeToast = mensaje;
-  this.tipoToast = tipo;
-  this.mostrarToast = true; // Hace visible el Toast
+  this.tipoToast = tipo; // Ahora esto ya no dará error
+  this.mostrarToast = true;
   
-  // Ajuste a 5000ms (5 segundos)
   setTimeout(() => {
-    this.mostrarToast = false; // Oculta la notificación
-    this.cdr.detectChanges();   // Fuerza a Angular a actualizar la vista
-  }, 5000); 
+    this.mostrarToast = false;
+    this.cdr.detectChanges();
+  }, 5000);
 }
 
 // Esta función se llama desde el botón pequeño de la tabla
@@ -326,7 +329,7 @@ confirmarActualizacion() {
       next: () => {
         this.cerrarModal(); 
         // Usamos tu sistema de Toast personalizado
-        this.lanzarToast('Registro actualizado con éxito', 'success');
+        // this.lanzarToast('Registro actualizado con éxito', 'success');
         this.cargar(); 
         this.cargarAlertas(); 
         this.cdr.detectChanges(); 
@@ -418,15 +421,15 @@ return !!(camposObligatorios && fechasValidas && !this.esDuplicado);
 }
 
 // Devuelve el texto informativo para el usuario
-obtenerMotivoBloqueo(): string {
-  const n = this.nuevo;
-  if (this.esDuplicado) return 'Este lote ya existe. Busque el registro y actualice la cantidad.';
-  if (!n.nombre || !n.tipo || !n.presentacion || !n.unidad || !n.cantidad  || !n.imagen) return 'Complete todos los campos del medicamento';
-  if (!n.fechaIngreso || !n.fechaCaducidad) return 'Indique las fechas de ingreso y caducidad';
-  if (this.fechaInvalida) return 'Corrija la fecha de caducidad (debe ser posterior al ingreso)';
-  if (this.salidaInvalida) return 'Corrija la fecha de salida (no puede superar la caducidad)';
-  return '';
-}
+// obtenerMotivoBloqueo(): string {
+//   const n = this.nuevo;
+//   if (this.esDuplicado) return 'Este lote ya existe. Busque el registro y actualice la cantidad.';
+//   if (!n.nombre || !n.tipo || !n.presentacion || !n.unidad || !n.cantidad  || !n.imagen) return 'Complete todos los campos del medicamento';
+//   if (!n.fechaIngreso || !n.fechaCaducidad) return 'Indique las fechas de ingreso y caducidad';
+//   if (this.fechaInvalida) return 'Corrija la fecha de caducidad (debe ser posterior al ingreso)';
+//   if (this.salidaInvalida) return 'Corrija la fecha de salida (no puede superar la caducidad)';
+//   return '';
+// }
 get esDuplicado(): boolean {
   if (!this.nuevo.nombre || !this.nuevo.fechaCaducidad || this.nuevo.id) return false;
 
@@ -434,5 +437,45 @@ get esDuplicado(): boolean {
     m.nombre.toLowerCase().trim() === this.nuevo.nombre.toLowerCase().trim() &&
     m.fechaCaducidad === this.nuevo.fechaCaducidad
   );
+}
+// Busca el medicamento que coincide en nombre y caducidad
+obtenerMedicamentoDuplicado(): any {
+  return this.medicamentos.find(m => 
+    m.nombre.toLowerCase().trim() === this.nuevo.nombre.toLowerCase().trim() &&
+    m.fechaCaducidad === this.nuevo.fechaCaducidad
+  );
+}
+
+// Acción para cargar el duplicado en el formulario automáticamente
+// 2. Método de edición mejorado con selección de texto
+editarLoteExistente() {
+  const duplicado = this.obtenerMedicamentoDuplicado();
+  if (duplicado) {
+    // Ahora 'info' es válido gracias al cambio anterior
+    this.lanzarToast('Lote detectado. Actualice la cantidad.', 'info');
+    this.editarMedicamento(duplicado);
+    
+    this.resaltarCantidad = true;
+
+    // Usamos setTimeout para esperar a que el DOM se actualice
+    setTimeout(() => {
+      if (this.cantidadField) {
+        const input = this.cantidadField.nativeElement;
+        input.focus();
+        input.select(); // Selecciona el texto para que el usuario solo escriba el nuevo valor
+      }
+      this.resaltarCantidad = false;
+    }, 600); // Un tiempo corto es suficiente
+  }
+}
+// Actualizamos el motivo de bloqueo para que sea más corto si hay botón
+obtenerMotivoBloqueo(): string {
+  const n = this.nuevo;
+  if (this.esDuplicado) return 'Lote ya registrado en el sistema';
+  if (!n.nombre || !n.tipo || !n.presentacion || !n.unidad || !n.cantidad) return 'Complete todos los campos del medicamento';
+  if (!n.fechaIngreso || !n.fechaCaducidad) return 'Indique las fechas de ingreso y caducidad';
+  if (this.fechaInvalida) return 'Corrija la fecha de caducidad (debe ser posterior al ingreso)';
+  if (this.salidaInvalida) return 'Corrija la fecha de salida (no puede superar la caducidad)';
+  return '';
 }
 }

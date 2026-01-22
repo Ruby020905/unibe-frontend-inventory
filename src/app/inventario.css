@@ -42,3 +42,28 @@
     color: #ff4d4d !important; /* Rojo vibrante para resaltar los 5 vencidos */
     font-weight: bold;
 }
+
+/* Efecto para los iconos del menú */
+.nav-menu li i {
+    transition: all 0.3s ease; /* Transición suave para el brillo */
+}
+
+/* Cuando pasas el mouse (Hover) */
+.nav-menu li:hover i {
+    color: var(--accent-red) !important; /* Cambia a rojo brillante */
+    text-shadow: 0 0 10px rgba(255, 33, 79, 0.6); /* Efecto de brillo/glow */
+    transform: scale(1.1); /* Crece un poquito para dar feedback */
+}
+
+/* Efecto especial para el icono activo (donde estás parado) */
+.nav-menu li.active i {
+    color: var(--accent-red);
+    text-shadow: 0 0 8px rgba(255, 33, 79, 0.4);
+}
+
+/* Asegurar que el icono del Logo también brille */
+.logo:hover i {
+    filter: drop-shadow(0 0 8px rgba(255, 33, 79, 0.7));
+    transform: scale(1.05);
+    transition: 0.3s;
+}

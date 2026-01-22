@@ -355,11 +355,41 @@
   </datalist>
 </div>
 
-        <div class="space-y-2 group">
-          <label class="text-[11px] font-black text-blue-900/40 uppercase tracking-widest ml-2 group-focus-within:text-[#005596] transition-colors">Cantidad</label>
-          <input type="number" [(ngModel)]="nuevo.cantidad" name="cantidad" required min="1" 
-            class="w-full p-4 rounded-2xl border-2 border-gray-100 bg-gray-50 font-bold text-[#005596] outline-none focus:border-[#005596] focus:bg-white focus:shadow-xl transition-all">
-        </div>
+      
+<div class="space-y-2 group">
+  <label class="text-[11px] font-black uppercase tracking-widest ml-2 transition-colors"
+         [ngClass]="(nuevo.cantidad < 0 || nuevo.cantidad > 1000) ? 'text-red-600' : 'text-blue-900/40'">
+    Cantidad (Máx. 1000)
+  </label>
+  
+  <div class="relative">
+    <input 
+      type="number" 
+      [(ngModel)]="nuevo.cantidad" 
+      name="cantidad" 
+      required 
+      min="0"
+      max="1000"
+      oninput="if(this.value > 1000) this.value = 1000; if(this.value < 0) this.value = 0;"
+      [class]="(nuevo.cantidad < 0 || nuevo.cantidad > 1000) ? 
+               'w-full p-4 rounded-2xl border-4 border-red-500 bg-red-50 font-black text-red-600 scale-105 transition-all shadow-2xl outline-none' : 
+               (resaltarCantidad ? 
+                'w-full p-4 rounded-2xl border-4 border-yellow-400 bg-yellow-50 font-black text-[#005596] scale-105 transition-all shadow-2xl outline-none' : 
+                'w-full p-4 rounded-2xl border-2 border-gray-100 bg-gray-50 font-bold text-[#005596] outline-none focus:border-[#005596] transition-all')"
+    >
+    
+    <span *ngIf="nuevo.cantidad === 1000" class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] bg-blue-100 text-[#005596] px-2 py-1 rounded-lg font-black">
+      LÍMITE ALCANZADO
+    </span>
+  </div>
+
+  <p *ngIf="nuevo.cantidad > 1000" class="text-[9px] font-black text-red-500 uppercase tracking-tighter ml-2 animate-bounce">
+    ⚠️ El inventario máximo permitido por lote es de 1000 unidades
+  </p>
+  <p *ngIf="nuevo.cantidad < 0" class="text-[9px] font-black text-red-500 uppercase tracking-tighter ml-2 animate-bounce">
+    ⚠️ La cantidad no puede ser menor a 0
+  </p>
+</div>
 
         <div class="space-y-2 group">
           <label class="text-[11px] font-black text-blue-900/40 uppercase tracking-widest ml-2 group-focus-within:text-[#005596] transition-colors">Imagen URL</label>
@@ -409,19 +439,24 @@
     </div>
   </div>
 
-      <div *ngIf="esDuplicado" 
-     class="mt-4 p-4 bg-blue-50 border-2 border-blue-200 rounded-2xl animate__animated animate__pulse animate__infinite">
-  <div class="flex items-center gap-3">
-    <span class="text-2xl">ℹ️</span>
-    <div class="flex flex-col">
-      <span class="text-[11px] font-black text-blue-800 uppercase italic">Lote ya existente</span>
-      <p class="text-[10px] font-medium text-blue-600">
-        Ya existe "{{nuevo.nombre}}" con caducidad {{nuevo.fechaCaducidad | date:'dd/MM/yyyy'}}. 
-        Por favor, **actualice el registro existente** en la tabla.
-      </p>
+     <div *ngIf="esDuplicado" 
+     class="mt-4 p-5 bg-blue-50 border-2 border-blue-200 rounded-[2rem] animate__animated animate__fadeInUp">
+  <div class="flex flex-col md:flex-row items-center gap-4">
+    <div class="bg-blue-500 p-3 rounded-full text-white shadow-lg">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
     </div>
+    <div class="flex-grow">
+      <h4 class="text-xs font-black text-blue-900 uppercase">Lote ya existente</h4>
+      <p class="text-[10px] text-blue-600 font-bold">Ya existe este registro. ¿Deseas actualizar su stock?</p>
+    </div>
+    <button type="button" (click)="editarLoteExistente()" class="px-6 py-3 bg-blue-600 text-white text-[10px] font-black uppercase rounded-xl hover:bg-blue-700 transition-all shadow-md">
+      EDITAR EXISTENTE
+    </button>
   </div>
 </div>
+
 
 
 
@@ -460,42 +495,106 @@
   </div>
 </div>
 <style>
-  .unibe-footer-container {
-    background-color: #001f3f !important; /* Azul marino muy oscuro y sólido */
-    color: #ffffff !important;
-    padding: 60px 20px 40px 20px !important;
-    margin-top: 100px !important;
-    display: block !important;
-    width: 100% !important;
-    position: relative !important;
-    z-index: 999 !important;
-    box-shadow: 0 -10px 30px rgba(0,0,0,0.3) !important;
-  }
-  .unibe-footer-container h4 {
-    color: #00d4ff !important; /* Celeste brillante para títulos */
-    font-weight: bold !important;
-    margin-bottom: 20px !important;
-    border-bottom: 2px solid #003366 !important;
-    padding-bottom: 10px !important;
-  }
-  .unibe-footer-container button {
-    background: none !important;
-    border: none !important;
-    color: #e0e0e0 !important;
-    cursor: pointer !important;
-    display: block !important;
-    margin-bottom: 12px !important;
-    font-size: 15px !important;
-    text-align: left !important;
-  }
-  .unibe-footer-container .status-card {
-    background: #001529 !important; /* Fondo aún más oscuro para el estado */
-    padding: 20px !important;
-    border-radius: 12px !important;
-    border: 1px solid #003366 !important;
-  }
+ .unibe-footer-container {
+  background: #002d51; /* Un azul más oscuro que el banner principal para contraste */
+  padding: 60px 20px 30px;
+  color: white;
+  margin-top: 50px;
+  width: 100%;
+  position: relative; /* Asegura que fluya después del contenido */
+  z-index: 10; /* Lo pone por delante del fondo beige */
+}
+
+.unibe-footer-container h4 {
+  color: #00d4ff;
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+}
+
+.unibe-footer-container button {
+  display: block;
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  padding: 8px 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.unibe-footer-container button:hover {
+  color: white;
+  padding-left: 10px;
+}
+
+.status-card {
+  background: #003a69;
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid #005596;
+}
 </style>
 
+
+<div *ngIf="mostrarModalEliminar" 
+     class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
+  
+  <div class="bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden transform transition-all p-8 border border-gray-100">
+    
+    <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-50 mb-6">
+      <svg class="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+    </div>
+
+    <div class="text-center mb-8">
+      <h3 class="text-2xl font-black text-[#005596] mb-3">¿Eliminar Registro?</h3>
+      <p class="text-gray-500 leading-relaxed">
+        Estás a punto de borrar <span class="font-bold text-red-600 underline">{{ medicamentoAEliminar?.nombre }}</span>. 
+        Esta acción es permanente y afectará el conteo de inventario.
+      </p>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <button (click)="confirmarEliminacion()" 
+              class="w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-red-200 transition-all active:scale-95">
+        Sí, eliminar definitivamente
+      </button>
+      
+      <button (click)="cerrarModalEliminar()" 
+        class="w-full py-4 bg-gray-50 hover:bg-gray-100 text-gray-400 rounded-2xl font-bold transition-all">
+  No, mantener registro
+      </button>
+    </div>
+  </div>
+</div>
+<div *ngIf="mostrarToast" 
+     [ngClass]="{
+       'bg-green-500': tipoToast === 'success',
+       'bg-red-500': tipoToast === 'error',
+       'bg-blue-500': tipoToast === 'info'
+     }"
+     class="fixed bottom-10 right-10 p-4 rounded-2xl text-white shadow-2xl animate__animated animate__backInRight">
+  {{ mensajeToast }}
+  
+  
+  <div class="mr-3 p-2 bg-white/20 rounded-lg">
+    <svg *ngIf="tipoToast === 'success'" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+    </svg>
+    <svg *ngIf="tipoToast === 'error'" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  </div>
+
+  <div>
+    <p class="text-xs font-black uppercase tracking-widest opacity-80">Notificación</p>
+    <p class="font-bold">{{ mensajeToast }}</p>
+  </div>
+</div>
 <footer class="unibe-footer-container">
   <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
     
@@ -537,102 +636,4 @@
     Quito, Ecuador
   </div>
 </footer>
-<div *ngIf="mostrarModalEliminar" 
-     class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity">
-  
-  <div class="bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden transform transition-all p-8 border border-gray-100">
-    
-    <div class="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-50 mb-6">
-      <svg class="h-10 w-10 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-      </svg>
-    </div>
-
-    <div class="text-center mb-8">
-      <h3 class="text-2xl font-black text-[#005596] mb-3">¿Eliminar Registro?</h3>
-      <p class="text-gray-500 leading-relaxed">
-        Estás a punto de borrar <span class="font-bold text-red-600 underline">{{ medicamentoAEliminar?.nombre }}</span>. 
-        Esta acción es permanente y afectará el conteo de inventario.
-      </p>
-    </div>
-
-    <div class="flex flex-col gap-3">
-      <button (click)="confirmarEliminacion()" 
-              class="w-full py-4 bg-red-600 hover:bg-red-700 text-white rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-red-200 transition-all active:scale-95">
-        Sí, eliminar definitivamente
-      </button>
-      
-      <button (click)="cerrarModalEliminar()" 
-        class="w-full py-4 bg-gray-50 hover:bg-gray-100 text-gray-400 rounded-2xl font-bold transition-all">
-  No, mantener registro
-      </button>
-    </div>
-  </div>
-</div>
-<div *ngIf="mostrarToast" 
-     class="fixed bottom-10 right-10 z-[200] flex items-center p-4 min-w-[300px] rounded-2xl shadow-2xl transition-all duration-500 transform animate-bounce-short"
-     [ngClass]="tipoToast === 'success' ? 'bg-emerald-500 text-white' : 'bg-red-600 text-white'">
-  
-  
-  <div class="mr-3 p-2 bg-white/20 rounded-lg">
-    <svg *ngIf="tipoToast === 'success'" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
-    </svg>
-    <svg *ngIf="tipoToast === 'error'" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
-    </svg>
-  </div>
-
-  <div>
-    <p class="text-xs font-black uppercase tracking-widest opacity-80">Notificación</p>
-    <p class="font-bold">{{ mensajeToast }}</p>
-  </div>
-</div>
-<!-- <div *ngIf="mostrarModal" class="fixed inset-0 z-[150] flex items-center justify-center bg-blue-900/40 backdrop-blur-sm p-4">
-  <div class="bg-white w-full max-w-2xl rounded-[3rem] p-10 shadow-2xl border-t-[10px] border-[#005596]">
-
-    <div *ngIf="!confirmandoEdicion">
-      <h2 class="text-3xl font-black text-[#005596] mb-8 uppercase tracking-tighter">Editar Medicamento</h2>
-      
-      <form #f="ngForm" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        </form>
-
-      <div class="mt-10 flex justify-center">
-        <button (click)="confirmandoEdicion = true" 
-                class="px-10 py-4 bg-[#005596] text-white rounded-2xl font-black uppercase">
-          Revisar Cambios
-        </button>
-      </div>
-    </div>
-
-    <div *ngIf="confirmandoEdicion" class="animate__animated animate__fadeIn">
-      <div class="text-center mb-8">
-        <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
-          <svg class="h-10 w-10 text-[#005596]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-        </div>
-
-        <h3 class="text-2xl font-black text-[#005596] mb-3">¿Actualizar Registro?</h3>
-        <p class="text-gray-500 leading-relaxed">
-          Estás a punto de modificar los datos de <span class="font-bold text-[#005596] underline">{{ nuevo?.nombre }}</span>. 
-          Esta acción actualizará la información en el inventario 2026.
-        </p>
-      </div>
-
-      <div class="flex flex-col gap-3">
-        <button (click)="confirmarActualizacion()" 
-                class="w-full py-4 bg-[#005596] hover:bg-[#00447a] text-white rounded-2xl font-black uppercase tracking-widest shadow-lg shadow-blue-200 transition-all active:scale-95">
-          Sí, confirmar cambios
-        </button>
-        
-        <button (click)="confirmandoEdicion = false" 
-                class="w-full py-4 bg-gray-50 hover:bg-gray-100 text-gray-400 rounded-2xl font-bold transition-all">
-          No, volver al formulario
-        </button>
-      </div>
-    </div>
-
-  </div>
-</div> -->
 </div>
