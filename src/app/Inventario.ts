@@ -102,6 +102,7 @@ readonly CATALOGO_MAESTRO: { [key: string]: { tipo: string, presentacion: string
     this.cargar();
     this.cargarAlertas();
     this.nombresFiltrados = [...this.nombresMedicamentos];
+    this.ordenarListas();
     
   }
 
@@ -148,6 +149,10 @@ guardar(): void {
       Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
     }
   });
+  if (!this.nombresMedicamentos.includes(this.nuevo.nombre)) {
+    this.nombresMedicamentos.push(this.nuevo.nombre);
+    this.ordenarListas(); // Se re-ordenan para que el nuevo aparezca en su lugar correcto
+  }
 }
 
   resetFormulario(): void {
@@ -477,5 +482,13 @@ obtenerMotivoBloqueo(): string {
   if (this.fechaInvalida) return 'Corrija la fecha de caducidad (debe ser posterior al ingreso)';
   if (this.salidaInvalida) return 'Corrija la fecha de salida (no puede superar la caducidad)';
   return '';
+}
+ordenarListas(): void {
+  // Ordena la lista de nombres
+  this.nombresMedicamentos.sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+  
+  // Opcional: También puedes ordenar las otras listas si lo deseas
+  this.tiposMedicamentos.sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+  this.presentacionesMedicamentos.sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
 }
 }
