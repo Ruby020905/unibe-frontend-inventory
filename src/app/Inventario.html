@@ -12,11 +12,11 @@
     <div class="flex items-center gap-2">
       <span class="text-[10px] font-black text-[#005596] uppercase tracking-[0.2em]">Sistema UNIBE</span>
     </div>
-<div *ngIf="usuarioActivo?.username === 'admin' || usuarioActivo?.rol === 'ADMIN'">
-    <button (click)="abrirModalRegistro()" type="button"
-          class="flex items-center gap-2 bg-[#ffcc00] text-[#005596] px-4 py-2 rounded-xl font-black text-[10px] uppercase hover:scale-105 transition-all shadow-md">
-    <span class="text-lg font-bold">+</span> Registrar Usuario
-  </button>
+<div *ngIf="usuarioActivo?.rol === 'ADMIN'">
+    <button (click)="mostrarFormularioRegistro = true" type="button"
+            class="flex items-center gap-2 bg-[#ffcc00] text-[#005596] px-4 py-2 rounded-xl font-black text-[10px] uppercase hover:scale-105 transition-all shadow-md">
+        <span class="text-lg font-bold">+</span> Registrar Usuario
+    </button>
 </div>
     <div class="flex items-center gap-4">
       <div class="flex items-center gap-3 pr-4 border-r border-gray-200">
@@ -86,7 +86,7 @@
         <td class="p-4">
           <span [ngClass]="{
             'bg-blue-100 text-blue-700': user.rol === 'ADMIN',
-            'bg-sky-100 text-sky-700': user.rol === 'EDITOR',
+            'bg-orange-100 text-orange-700': user.rol === 'EDITOR',
             'bg-green-100 text-green-700': user.rol === 'LECTOR'
           }" class="px-3 py-1 rounded-full text-xs font-bold">
             {{ user.rol }}
@@ -98,7 +98,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
             </svg>
           </button>
-          <button (click)="eliminarUsuario(user.id)" class="text-red-500 hover:text-red-700 p-2">
+          <button *ngIf="user.id !== usuarioActivo.id"(click)="eliminarUsuario(user.id)" class="text-red-500 hover:text-red-700 p-2">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-4v6m4-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
@@ -759,7 +759,7 @@
   </div>
 </footer>
 </div>
-<div *ngIf="mostrarRegistroModal" 
+<div *ngIf="mostrarFormularioRegistro" 
      class="fixed inset-0 z-[99999] flex items-center justify-center p-4 backdrop-blur-sm bg-black/60 transition-all duration-300">
     
     <div class="relative z-10 bg-white/95 backdrop-blur-md p-8 rounded-[2.5rem] shadow-2xl w-full max-w-sm border border-white/20 scale-in-center">
@@ -804,9 +804,42 @@
                 GUARDAR REGISTRO
             </button>
 
-            <button (click)="mostrarRegistroModal = false" 
-                    class="w-full text-gray-400 hover:text-red-500 font-bold text-[10px] uppercase tracking-widest transition-colors">
-                CANCELAR Y VOLVER
+            <button (click)="mostrarFormularioRegistro = false" 
+        class="w-full text-gray-400 hover:text-red-500 font-bold text-[10px] uppercase tracking-widest transition-colors">
+    CANCELAR Y VOLVER
+</button>
+        </div>
+    </div>
+</div>
+<div *ngIf="mostrarEdicionModal" class="fixed inset-0 z-[99999] flex items-center justify-center p-4 backdrop-blur-sm bg-black/60">
+    <div class="bg-white/95 p-8 rounded-[2.5rem] shadow-2xl w-full max-w-sm border border-white/20">
+        <h2 class="text-2xl font-black text-[#005596] text-center mb-6 uppercase">Editar Usuario</h2>
+        
+        <div class="space-y-4">
+            <div>
+                <label class="text-[10px] font-black text-[#005596] uppercase">Usuario</label>
+                <input [(ngModel)]="usuarioEditando.username" class="w-full p-3 rounded-xl border-2 border-gray-100 outline-none focus:border-[#005596]">
+            </div>
+            <div>
+                <label class="text-[10px] font-black text-[#005596] uppercase">Nueva Contraseña (Opcional)</label>
+                <input type="password" [(ngModel)]="usuarioEditando.password" placeholder="••••••••" class="w-full p-3 rounded-xl border-2 border-gray-100 outline-none focus:border-[#005596]">
+            </div>
+            <div>
+                <label class="text-[10px] font-black text-[#005596] uppercase">Rol</label>
+                <select [(ngModel)]="usuarioEditando.rol" class="w-full p-3 rounded-xl border-2 border-gray-100 outline-none focus:border-[#005596]">
+                    <option value="ADMIN">ADMINISTRADOR</option>
+                    <option value="EDITOR">EDITOR</option>
+                    <option value="LECTOR">LECTOR</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mt-8 space-y-3">
+            <button (click)="guardarCambiosUsuario()" class="w-full bg-[#005596] text-white p-3 rounded-xl font-black shadow-lg hover:bg-[#ffcc00] hover:text-[#005596] transition-all uppercase">
+                GUARDAR CAMBIOS
+            </button>
+            <button (click)="mostrarEdicionModal = false" class="w-full text-gray-400 font-bold text-[10px] uppercase">
+                CANCELAR
             </button>
         </div>
     </div>

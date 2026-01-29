@@ -23,4 +23,9 @@ getUsuarios(): Observable<any[]> {
 eliminarUsuario(id: number): Observable<any> {
   return this.http.delete(`${this.apiUrl}/usuarios/${id}`);
 }
+// En LoginService.ts
+actualizarUsuario(id: number, datos: any): Observable<any> {
+  // Asegúrate de que la URL coincida con tu Backend (usualmente /api/usuarios o /api/login/usuarios)
+  return this.http.put(`http://localhost:8081/api/login/usuarios/${id}`, datos);
+}
 }
