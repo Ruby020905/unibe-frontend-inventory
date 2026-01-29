@@ -16,4 +16,11 @@ export class LoginService {
   // Asegúrate de que la URL sea exactamente esta:
   return this.http.post('http://localhost:8081/api/usuarios', usuario);
 }
+getUsuarios(): Observable<any[]> {
+  return this.http.get<any[]>('http://localhost:8081/api/login/usuarios');
+}
+
+eliminarUsuario(id: number): Observable<any> {
+  return this.http.delete(`${this.apiUrl}/usuarios/${id}`);
+}
 }

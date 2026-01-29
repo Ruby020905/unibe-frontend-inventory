@@ -9,6 +9,7 @@ import { Router } from '@angular/router';
 // 1. IMPORTANTE: Debes instalarlo con: npm install sweetalert2
 import Swal from 'sweetalert2'; 
 import { Observable } from 'rxjs';
+import { LoginService } from './LoginService';
 
 @Component({
   selector: 'app-inventario',
@@ -45,6 +46,7 @@ usuarioActivo: any = { username: '', rol: '' };
   imagenExpandida: string | null = null;
 mostrarRegistroModal: boolean = false;
 nuevoUsuario = { username: '', password: '', rol: 'LECTOR' };
+usuarios: any[] = [];
   nuevo: Medicamento = {
     nombre: '',
     tipo: '',
@@ -97,7 +99,7 @@ readonly CATALOGO_MAESTRO: { [key: string]: { tipo: string, presentacion: string
   'Bellaface': { tipo: 'ANTICONCEPTIVO', presentacion: 'TABLETAS', unidad: 'CAJAS' },
   'Dixi-35': { tipo: 'ANTICONCEPTIVO', presentacion: 'TABLETAS', unidad: 'CAJAS' }
 };
-  constructor(private service: MedicamentoService, private cdr: ChangeDetectorRef, private router: Router,private http: HttpClient) {}
+  constructor(private service: MedicamentoService, private cdr: ChangeDetectorRef, private router: Router,private http: HttpClient,private loginService: LoginService) {}
 
   ngOnInit(): void {
     const guardado = localStorage.getItem('usuarioLogueado');
@@ -140,6 +142,8 @@ const data = localStorage.getItem('usuario_actual');
         this.cdr.detectChanges(); // Fuerza a Angular a pintar el 5
       }
     });
+
+    this.obtenerUsuarios();
 }
 
 guardar(): void {
@@ -565,8 +569,26 @@ registrarNuevoUsuario() {
     }
   });
 }
-// En tu archivo MedicamentoService.ts (o el que estés usando)
+obtenerUsuarios() {
+    this.loginService.getUsuarios().subscribe({
+      next: (data) => this.usuarios = data,
+      error: (err) => console.error("Error al cargar usuarios", err)
+    });
+  }
 
-// Añade esta función dentro de la clase del servicio:
+  // 3. Crear el método para editar (esto quita el error 'prepararEdicionUsuario')
+  prepararEdicionUsuario(user: any) {
+    console.log("Editando a:", user);
+    // Aquí abrirías tu modal de edición
+  }
 
+  // 4. Crear el método para eliminar (esto quita el error 'eliminarUsuario')
+  eliminarUsuario(id: number) {
+    if(confirm('¿Estás seguro de eliminar este usuario?')) {
+      this.loginService.eliminarUsuario(id).subscribe(() => {
+        this.obtenerUsuarios(); // Recargamos la lista
+      });
+    }
+  }
 }
+
