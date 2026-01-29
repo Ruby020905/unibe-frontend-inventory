@@ -20,7 +20,7 @@ export class Inventario implements OnInit {
 
 @ViewChild('cantidadInput') cantidadField!: ElementRef; 
   resaltarCantidad: boolean = false;
-
+nombreDeArchivo: string = '';
   confirmandoEdicion: boolean = false;
   mostrarToast: boolean = false;
 mensajeToast: string = '';
@@ -41,6 +41,7 @@ medicamentoAEliminar: any = null;
     vencidos: 0,
     proximos: 0
   };
+  imagenExpandida: string | null = null;
 
   nuevo: Medicamento = {
     nombre: '',
@@ -103,7 +104,10 @@ readonly CATALOGO_MAESTRO: { [key: string]: { tipo: string, presentacion: string
     this.cargarAlertas();
     this.nombresFiltrados = [...this.nombresMedicamentos];
     this.ordenarListas();
-    
+    const datosGuardados = localStorage.getItem('mis_medicamentos');
+  if (datosGuardados) {
+    this.nombresMedicamentos = JSON.parse(datosGuardados);
+  }
   }
 
   cargar(): void {
@@ -153,6 +157,9 @@ guardar(): void {
     this.nombresMedicamentos.push(this.nuevo.nombre);
     this.ordenarListas(); // Se re-ordenan para que el nuevo aparezca en su lugar correcto
   }
+  localStorage.setItem('mis_medicamentos', JSON.stringify(this.nombresMedicamentos));
+  this.nuevo.imagen = ''; // Limpiamos la foto para el siguiente registro
+  this.cdr.detectChanges();
 }
 
   resetFormulario(): void {
@@ -490,5 +497,32 @@ ordenarListas(): void {
   // Opcional: También puedes ordenar las otras listas si lo deseas
   this.tiposMedicamentos.sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
   this.presentacionesMedicamentos.sort((a, b) => a.localeCompare(b, 'es', { sensitivity: 'base' }));
+}
+subirImagen(event: any): void {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    
+    reader.onload = (e: any) => {
+      // 1. Asignamos el resultado
+      this.nuevo.imagen = e.target.result as string;
+      
+      // 2. IMPORTANTE: Forzamos a Angular a actualizar la vista
+      this.cdr.detectChanges(); 
+      
+      console.log("Imagen procesada y lista para ver");
+    };
+    
+    reader.readAsDataURL(file);
+  }
+}
+// Función para abrir
+verImagen(url: string) {
+  this.imagenExpandida = url;
+}
+
+// Función para cerrar
+cerrarImagen() {
+  this.imagenExpandida = null;
 }
 }

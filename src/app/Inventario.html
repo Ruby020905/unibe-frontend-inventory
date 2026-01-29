@@ -131,7 +131,8 @@
     </div>
    <input 
   type="text" 
-  [(ngModel)]="filtroNombre" 
+  [(ngModel)]="filtroNombre"
+    (input)="filtroNombre= filtroNombre.toUpperCase()"
   placeholder="Buscar medicamento por nombre..." 
   class="w-full pl-12 pr-4 py-4 rounded-2xl border-2 border-gray-100 bg-gray-50 font-bold text-gray-700 outline-none focus:border-[#005596] focus:bg-white focus:shadow-2xl transition-all"
 >
@@ -184,7 +185,19 @@
           <td class="px-6 py-5 text-center font-black text-[#005596]">{{ m.presentacion }}</td>
           <td class="px-6 py-5 text-center font-black text-[#005596]">{{ m.unidad }}</td>
           <td class="px-6 py-5 text-center font-black text-[#005596]">{{ m.cantidad }}</td>
-          <td class="px-6 py-5 text-sm text-blue-400 truncate max-w-[100px]">{{ m.imagen }}</td>
+           <td class="p-4">
+  <div class="flex justify-center">
+    <div (click)="verImagen(m.imagen)" 
+         class="w-14 h-14 rounded-lg overflow-hidden border-2 border-gray-100 shadow-sm cursor-pointer hover:scale-105 transition-transform active:scale-95 bg-white">
+      
+      <img *ngIf="m.imagen" [src]="m.imagen" class="w-full h-full object-cover">
+      
+      <div *ngIf="!m.imagen" class="w-full h-full flex items-center justify-center bg-gray-50 text-gray-400 text-[10px]">
+        S/F
+      </div>
+    </div>
+  </div>
+</td>
           <td class="px-6 py-5 font-bold text-sm text-gray-700">{{ m.fechaIngreso | date:'dd/MM/yyyy' }}</td>
           <td class="px-6 py-5 font-bold text-sm text-gray-400">{{ m.fechaSalida | date:'dd/MM/yyyy' }}</td>
           <td class="px-6 py-5">
@@ -394,13 +407,39 @@
     ⚠️ La cantidad no puede ser menor a 0
   </p>
 </div>
+<div class="flex flex-col items-center justify-center p-6 border-2 border-dashed border-gray-200 rounded-2xl bg-gray-50 hover:bg-white hover:border-[#005596] transition-all relative min-h-[200px]">
+  
+  <input 
+    type="file" 
+    accept="image/*" 
+    (change)="subirImagen($event)"
+    class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-20"
+  >
+  
+  <div class="flex flex-col items-center z-10 pointer-events-none">
+    
+    <div class="text-4xl mb-2">
+      {{ nuevo.imagen ? '✅' : '📸' }}
+    </div>
 
-        <div class="space-y-2 group">
-          <label class="text-[11px] font-black text-blue-900/40 uppercase tracking-widest ml-2 group-focus-within:text-[#005596] transition-colors">Imagen URL</label>
-          <input type="text" [(ngModel)]="nuevo.imagen" name="imagen" placeholder="https://..."
-            class="w-full p-4 rounded-2xl border-2 border-gray-100 bg-gray-50 font-bold outline-none focus:border-[#005596] focus:bg-white focus:shadow-xl transition-all">
-        </div>
+    <p class="text-sm font-black uppercase tracking-widest text-[#005596] mb-1">
+      {{ nuevo.nombre || 'SIN NOMBRE' }}
+    </p>
 
+    <p class="text-[10px] font-bold text-gray-400 uppercase">
+      {{ nuevo.imagen ? 'IMAGEN LISTA PARA GUARDAR' : 'CLICK PARA SUBIR IMAGEN' }}
+    </p>
+
+    <div *ngIf="nuevo.imagen" class="mt-4">
+      <img 
+        [src]="nuevo.imagen" 
+        class="w-32 h-32 rounded-xl object-cover shadow-lg border-2 border-white ring-1 ring-gray-100"
+        alt="Previsualización"
+      >
+    </div>
+  </div>
+
+</div>
         <div class="space-y-2 group">
     <label class="text-[11px] font-black text-blue-900/40 uppercase tracking-widest ml-2 italic">📅 Ingreso</label>
     <input type="date" [(ngModel)]="nuevo.fechaIngreso" name="fechaIngreso" required 
@@ -632,7 +671,23 @@
         </p>
       </div>
     </div>
+<div *ngIf="imagenExpandida" 
+     class="fixed inset-0 z-[9999] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 cursor-zoom-out"
+     (click)="cerrarImagen()">
+  
+  <button class="absolute top-6 right-6 text-white text-5xl font-light hover:text-gray-300 transition-colors">&times;</button>
 
+  <div class="relative max-w-5xl w-full flex justify-center animate-in zoom-in duration-300">
+    <img [src]="imagenExpandida" 
+         class="max-h-[85vh] max-w-full rounded-lg shadow-2xl border-4 border-white/20 object-contain"
+         (click)="$event.stopPropagation()">
+  </div>
+
+  <div class="mt-6 text-center text-white/80">
+    <p class="text-xs tracking-[0.2em] font-black uppercase">Vista Previa del Inventario</p>
+    <p class="text-[10px] mt-1 opacity-50">Haz clic en cualquier lugar para cerrar</p>
+  </div>
+</div>
   </div>
 
   <div style="text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #003366; color: #64748b !important; font-size: 0.8rem;">
