@@ -35,7 +35,11 @@
   </div>
   <div class="flex items-center p-2"></div>
  <div class="w-10 h-10 rounded-md bg-[#005596] flex items-center justify-center text-white font-bold shadow-sm"
-      [ngClass]="usuarioActivo?.rol === 'ADMIN' ? 'bg-[#005596]' : 'bg-green-600'">
+      [ngClass]="{
+        'bg-[#005596]': usuarioActivo?.rol === 'ADMIN',
+        'bg-orange-500': usuarioActivo?.rol === 'EDITOR',
+        'bg-green-600': usuarioActivo?.rol === 'LECTOR'
+     }">
     <span class="text-sm uppercase">
       {{ usuarioActivo?.username ? usuarioActivo.username[0] : 'U' }}
     </span>
@@ -211,7 +215,7 @@
           </td>
           <td class="px-6 py-5">
             <div class="flex items-center justify-center gap-3">
-              <button *ngIf="usuarioActivo?.rol === 'ADMIN'" (click)="editarMedicamento(m)" class="p-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-[#005596] hover:text-white transition-all shadow-sm">
+              <button *ngIf="usuarioActivo?.rol === 'ADMIN'|| usuarioActivo?.rol === 'EDITOR'" (click)="editarMedicamento(m)" class="p-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-[#005596] hover:text-white transition-all shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
@@ -702,37 +706,54 @@
 </footer>
 </div>
 <div *ngIf="mostrarRegistroModal" 
-     style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: rgba(0,0,0,0.8) !important; z-index: 999999 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
+     class="fixed inset-0 z-[99999] flex items-center justify-center p-4 backdrop-blur-sm bg-black/60 transition-all duration-300">
     
-    <div style="background: white !important; padding: 30px !important; border-radius: 20px !important; width: 350px !important; color: black !important; box-shadow: 0 0 20px rgba(0,0,0,0.5) !important;">
+    <div class="relative z-10 bg-white/95 backdrop-blur-md p-8 rounded-[2.5rem] shadow-2xl w-full max-w-sm border border-white/20 scale-in-center">
         
-        <h2 style="margin-top: 0; color: #005596; text-align: center;">NUEV0 USUARIO</h2>
-        
-        <div style="margin-bottom: 15px;">
-            <label style="display: block; font-size: 12px; font-weight: bold;">Usuario:</label>
-            <input [(ngModel)]="nuevoUsuario.username" name="user" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+        <div class="flex flex-col items-center mb-6">
+            <div class="w-20 h-20 mb-3 p-3 bg-white rounded-2xl shadow-md flex items-center justify-center">
+                <img src="logo-unibe.png" alt="Logo UNIBE" class="w-full h-full object-contain">
+            </div>
+            <h2 class="text-2xl font-black text-[#005596] tracking-tighter uppercase">NUEVO USUARIO</h2>
+            <div class="h-1 w-12 bg-[#ffcc00] rounded-full mt-1"></div>
         </div>
 
-        <div style="margin-bottom: 15px;">
-            <label style="display: block; font-size: 12px; font-weight: bold;">Contraseña:</label>
-            <input type="password" [(ngModel)]="nuevoUsuario.password" name="pass" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+        <div class="space-y-4">
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-[#005596] uppercase ml-1">Nombre de Usuario</label>
+                <input [(ngModel)]="nuevoUsuario.username" name="user" 
+                       placeholder="ej. ruby.admin"
+                       class="w-full p-3 rounded-xl border-2 border-gray-100 bg-white focus:border-[#005596] transition-all outline-none text-gray-700 shadow-sm text-sm"/>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-[#005596] uppercase ml-1">Contraseña</label>
+                <input type="password" [(ngModel)]="nuevoUsuario.password" name="pass" 
+                       placeholder="••••••••"
+                       class="w-full p-3 rounded-xl border-2 border-gray-100 bg-white focus:border-[#005596] transition-all outline-none text-gray-700 shadow-sm text-sm"/>
+            </div>
+
+            <div class="space-y-1">
+                <label class="text-[10px] font-black text-[#005596] uppercase ml-1">Asignar Rol</label>
+                <select [(ngModel)]="nuevoUsuario.rol" name="rol" 
+                        class="w-full p-3 rounded-xl border-2 border-gray-100 bg-white focus:border-[#005596] transition-all outline-none text-gray-700 shadow-sm text-sm appearance-none cursor-pointer">
+                    <option value="ADMIN">ADMINISTRADOR</option>
+                    <option value="EDITOR">EDITOR</option>
+                    <option value="LECTOR">LECTOR</option>
+                </select>
+            </div>
         </div>
 
-        <div style="margin-bottom: 20px;">
-            <label style="display: block; font-size: 12px; font-weight: bold;">Rol:</label>
-            <select [(ngModel)]="nuevoUsuario.rol" name="rol" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
-                <option value="ADMIN">ADMINISTRADOR</option>
-                <option value="EDITOR">EDITOR</option>
-                <option value="LECTOR">LECTOR</option>
-            </select>
+        <div class="mt-8 space-y-3">
+            <button (click)="registrarNuevoUsuario()" 
+                    class="w-full bg-[#005596] text-white p-3 rounded-xl font-black text-sm shadow-lg hover:bg-[#ffcc00] hover:text-[#005596] active:scale-95 transition-all duration-300 uppercase">
+                GUARDAR REGISTRO
+            </button>
+
+            <button (click)="mostrarRegistroModal = false" 
+                    class="w-full text-gray-400 hover:text-red-500 font-bold text-[10px] uppercase tracking-widest transition-colors">
+                CANCELAR Y VOLVER
+            </button>
         </div>
-
-        <button (click)="registrarNuevoUsuario()" style="width: 100%; background: #005596; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
-            GUARDAR
-        </button>
-
-        <button (click)="mostrarRegistroModal = false" style="width: 100%; background: transparent; color: red; margin-top: 10px; border: none; cursor: pointer;">
-            CANCELAR
-        </button>
     </div>
 </div>

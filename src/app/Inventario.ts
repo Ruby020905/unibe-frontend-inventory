@@ -541,14 +541,12 @@ cerrarImagen() {
 
 abrirModalRegistro() {
   console.log("Intentando abrir modal...");
-  alert("¡El código funciona! Ahora forzaremos la vista."); // <--- Agrega esto
   this.mostrarRegistroModal = true;
 }
 
 registrarNuevoUsuario() {
   this.service.registrarUsuario(this.nuevoUsuario).subscribe({
     next: (res) => {
-      alert("¡Usuario creado!");
       this.mostrarRegistroModal = false; // Esto cierra el modal automáticamente
     },
     error: (err) => alert("Error al registrar")
@@ -559,13 +557,11 @@ registrarNuevoUsuario() {
   
   this.service.registrarUsuario(this.nuevoUsuario).subscribe({
     next: (res: any) => { // Agregado :any para evitar error 7006
-      alert('¡Usuario creado correctamente!');
       this.mostrarRegistroModal = false;
-      this.nuevoUsuario = { username: '', password: '', rol: 'LECTOR' }; 
+      this.nuevoUsuario = { username: '', password: '', rol: '' }; 
     },
     error: (err: any) => { // Agregado :any para evitar error 7006
       console.error('Detalle del error:', err);
-      alert('Error al crear usuario. Revisa que el backend esté corriendo.');
     }
   });
 }
