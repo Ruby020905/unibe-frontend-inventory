@@ -6,31 +6,52 @@
     <div class="absolute inset-0 bg-gradient-to-tr from-white via-white/80 to-[#005596]/10"></div>
   </div>
 
-  <nav class="relative z-50 max-w-7xl mx-auto mb-6">
-    <div class="bg-white/60 backdrop-blur-lg border border-white/40 shadow-sm rounded-2xl px-6 py-3 flex justify-between items-center">
-      <div class="flex items-center gap-2">
-        <span class="text-[10px] font-black text-[#005596] uppercase tracking-[0.2em]">Sistema UNIBE</span>
-      </div>
-      <div class="flex items-center gap-4">
-        <div class="flex items-center gap-3 pr-4 border-r border-gray-200">
-          <div class="text-right hidden sm:block">
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">Sesión activa</p>
-            <p class="text-xs font-black text-[#005596]">{{ usuarioActivo }}</p>
-          </div>
-          <div class="w-8 h-8 rounded-full bg-[#005596] text-white flex items-center justify-center font-bold text-xs shadow-md uppercase">
-            {{ usuarioActivo.charAt(0) }}
-          </div>
-        </div>
-        <button (click)="logout()" class="text-red-500 hover:text-red-700 font-bold text-xs uppercase">Salir</button>
-      </div>
+<nav class="relative z-50 max-w-7xl mx-auto mb-6">
+  <div class="bg-white/60 backdrop-blur-lg border border-white/40 shadow-sm rounded-2xl px-6 py-3 flex justify-between items-center">
+    
+    <div class="flex items-center gap-2">
+      <span class="text-[10px] font-black text-[#005596] uppercase tracking-[0.2em]">Sistema UNIBE</span>
     </div>
-  </nav>
+<div *ngIf="usuarioActivo?.username === 'admin' || usuarioActivo?.rol === 'ADMIN'">
+    <button (click)="abrirModalRegistro()" type="button"
+          class="flex items-center gap-2 bg-[#ffcc00] text-[#005596] px-4 py-2 rounded-xl font-black text-[10px] uppercase hover:scale-105 transition-all shadow-md">
+    <span class="text-lg font-bold">+</span> Registrar Personal
+  </button>
+</div>
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-3 pr-4 border-r border-gray-200">
+        
+        
+   <div class="flex items-center p-2">
+  <div class="ml-3 flex flex-col justify-center">
+  <div class="ml-3 flex flex-col">
+    <p class="text-[12px] font-black text-[#005596] uppercase leading-none mb-1">
+      {{ usuarioActivo?.username || 'INVITADO' }}
+    </p>
+    <p class="text-[10px] text-gray-500 font-bold uppercase leading-none">
+      {{ usuarioActivo?.rol || 'PERSONAL' }}
+    </p>
+  </div>
+  </div>
+  <div class="flex items-center p-2"></div>
+ <div class="w-10 h-10 rounded-md bg-[#005596] flex items-center justify-center text-white font-bold shadow-sm">
+    <span class="text-sm uppercase">
+      {{ usuarioActivo?.username ? usuarioActivo.username[0] : 'U' }}
+    </span>
+  </div>
+
+</div>
+      </div>
+  
+      <button (click)="logout()" class="text-red-500 hover:text-red-700 font-bold text-xs uppercase">Salir</button>
+    </div>
+  </div> </nav>
 
   <div *ngIf="vistaActual === 'resumen'" class="relative z-10 max-w-7xl mx-auto animate-in fade-in duration-500 space-y-8">
     
     <div class="bg-[#005596] rounded-[2rem] p-8 text-white shadow-2xl relative overflow-hidden">
       <div class="relative z-10">
-        <h2 class="text-3xl font-black uppercase tracking-tighter">Bienvenido {{ usuarioActivo }}</h2>
+        <h2 class="text-3xl font-black uppercase tracking-tighter">Bienvenido   {{ usuarioActivo?.username || 'Invitado' }}</h2>
         <p class="opacity-80 font-medium uppercase text-xs tracking-widest mt-1">Estado actual de la Unidad Médica - UNIBE</p>
       </div>
       <div class="absolute right-[-20px] top-[-20px] opacity-10 text-[10rem]">🏥</div>
@@ -65,28 +86,6 @@
       </button>
     </div>
   </div>
-  <!-- <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-    <div (click)="filtrarYVer('vencidos')" class="cursor-pointer bg-red-600 rounded-[3rem] p-10 text-white shadow-2xl relative overflow-hidden group transition-transform hover:scale-[1.02]">
-      <h4 class="text-sm font-black uppercase tracking-[0.2em] opacity-80">Medicamentos Vencidos</h4>
-      <p class="text-9xl font-black mt-4 tracking-tighter">{{ alertas.vencidos }}</p>
-      <span class="absolute right-[-20px] bottom-[-20px] text-[12rem] opacity-20 rotate-12 transition-transform group-hover:scale-110">☠️</span>
-    </div>
-
-    <div (click)="filtrarYVer('proximos')" class="cursor-pointer bg-white rounded-[3rem] p-10 shadow-2xl border-b-[15px] border-[#ffcc00] relative overflow-hidden group transition-transform hover:scale-[1.02]">
-      <h4 class="text-sm font-black uppercase tracking-[0.2em] text-gray-400">Próximos a Vencer</h4>
-      <p class="text-9xl font-black text-[#005596] mt-4 tracking-tighter">{{ alertas.proximos }}</p>
-      <span class="absolute right-[-10px] bottom-[-10px] text-[12rem] opacity-5 rotate-12 transition-transform group-hover:scale-110">⏳</span>
-    </div>
-  </div>-->
-<!-- <div *ngIf="filtroActual !== 'todos'" class="mb-4 flex items-center gap-2">
-  <span class="text-xs font-bold text-gray-500 uppercase">Filtro activo: </span>
-  <span class="px-3 py-1 bg-blue-100 text-[#005596] rounded-full text-[10px] font-black uppercase">
-    {{ filtroActual }}
-  </span>
-  <button (click)="setFiltro('todos')" class="text-xs text-red-500 underline font-bold ml-2">
-    Quitar Filtro
-  </button>
-</div>  -->
   <div class="flex justify-center pt-10">
     <button (click)="irAGestion()" class="bg-[#005596] hover:bg-[#ffcc00] hover:text-[#005596] text-white px-12 py-5 rounded-[2rem] font-black text-lg shadow-2xl transition-all hover:scale-105 active:scale-95 flex items-center gap-4">
       GESTIONAR INVENTARIO COMPLETO ➜
@@ -114,7 +113,7 @@
       
       <div class="flex items-center gap-3">
         <button (click)="exportarExcel()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-6 py-3 rounded-2xl font-bold shadow-lg transition-all active:scale-95">📊 Exportar</button>
-        <button (click)="abrirModal()" class="bg-[#005596] hover:bg-[#ffcc00] hover:text-[#005596] text-white px-6 py-3 rounded-2xl font-bold shadow-lg transition-all active:scale-95">
+        <button *ngIf="usuarioActivo?.rol === 'ADMIN'" (click)="abrirModal()" class="bg-[#005596] hover:bg-[#ffcc00] hover:text-[#005596] text-white px-6 py-3 rounded-2xl font-bold shadow-lg transition-all active:scale-95">
           ➕ Agregar Medicamento
         </button>
       </div>
@@ -211,16 +210,19 @@
           </td>
           <td class="px-6 py-5">
             <div class="flex items-center justify-center gap-3">
-              <button (click)="editarMedicamento(m)" class="p-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-[#005596] hover:text-white transition-all shadow-sm">
+              <button *ngIf="usuarioActivo?.rol === 'ADMIN'" (click)="editarMedicamento(m)" class="p-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-[#005596] hover:text-white transition-all shadow-sm">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
               </button>
-              <button (click)="prepararEliminar(m)" class="p-2.5 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all">
+              <button *ngIf="usuarioActivo?.rol === 'ADMIN'" (click)="prepararEliminar(m)" class="p-2.5 rounded-xl bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-all">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </button>
+              <span *ngIf="usuarioActivo?.rol !== 'ADMIN'" class="text-gray-400 italic">
+    Solo lectura
+  </span>
             </div>
           </td>
         </tr>
@@ -687,7 +689,9 @@
     <p class="text-xs tracking-[0.2em] font-black uppercase">Vista Previa del Inventario</p>
     <p class="text-[10px] mt-1 opacity-50">Haz clic en cualquier lugar para cerrar</p>
   </div>
+ 
 </div>
+
   </div>
 
   <div style="text-align: center; margin-top: 50px; padding-top: 20px; border-top: 1px solid #003366; color: #64748b !important; font-size: 0.8rem;">
@@ -695,4 +699,39 @@
     Quito, Ecuador
   </div>
 </footer>
+</div>
+<div *ngIf="mostrarRegistroModal" 
+     style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: rgba(0,0,0,0.8) !important; z-index: 999999 !important; display: flex !important; align-items: center !important; justify-content: center !important;">
+    
+    <div style="background: white !important; padding: 30px !important; border-radius: 20px !important; width: 350px !important; color: black !important; box-shadow: 0 0 20px rgba(0,0,0,0.5) !important;">
+        
+        <h2 style="margin-top: 0; color: #005596; text-align: center;">NUEV0 USUARIO</h2>
+        
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-size: 12px; font-weight: bold;">Usuario:</label>
+            <input [(ngModel)]="nuevoUsuario.username" name="user" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+        </div>
+
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; font-size: 12px; font-weight: bold;">Contraseña:</label>
+            <input type="password" [(ngModel)]="nuevoUsuario.password" name="pass" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; font-size: 12px; font-weight: bold;">Rol:</label>
+            <select [(ngModel)]="nuevoUsuario.rol" name="rol" style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 8px;">
+                <option value="ADMIN">ADMINISTRADOR</option>
+                <option value="EDITOR">EDITOR</option>
+                <option value="LECTOR">LECTOR</option>
+            </select>
+        </div>
+
+        <button (click)="registrarNuevoUsuario()" style="width: 100%; background: #005596; color: white; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer;">
+            GUARDAR
+        </button>
+
+        <button (click)="mostrarRegistroModal = false" style="width: 100%; background: transparent; color: red; margin-top: 10px; border: none; cursor: pointer;">
+            CANCELAR
+        </button>
+    </div>
 </div>

@@ -39,6 +39,13 @@ eliminar(id: number) {
 editar(m: Medicamento) {
   return this.http.put(`${this.api}/${m.id}`, m); 
 }
-    
+    guardarUsuario(usuario: any): Observable<any> {
+    return this.http.post('http://localhost:8081/api/login', usuario);
+  }
   
+  registrarUsuario(usuario: any) {
+  // Asegúrate de que la URL sea exactamente esta:
+  return this.http.post('http://localhost:8081/api/usuarios', usuario);
+}
+
 }

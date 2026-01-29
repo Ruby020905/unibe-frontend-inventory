@@ -17,24 +17,17 @@ export class Login{
 
   constructor(private loginService: LoginService, private router: Router) {}
 
- onLogin() {
-  this.loginService.login(this.username, this.password).subscribe({
-    next: (res) => {
-      // Si el backend responde con un booleano true
+
+  onLogin() {
+ // En tu componente de Login
+this.loginService.login(this.username, this.password).subscribe({
+  next: (user) => {
+    if (user) {
+      // 'user' ahora es el objeto {username: 'ruby', rol: 'LECTOR'}
+      localStorage.setItem('usuario_actual', JSON.stringify(user));
       this.router.navigate(['/inventario']);
-      if (res === true) {
-    localStorage.setItem('usuarioLogueado', this.username); // Guardamos el nombre
-    this.router.navigate(['/inventario']);
-  }
-    },
-    error: (err) => {
-      if (err.status === 401) {
-        this.error = "Usuario o contraseña incorrectos.";
-      } else {
-        this.error = "El servidor no responde. Intente más tarde.";
-      }
     }
-    
-  });
+  }
+});
 }
 }

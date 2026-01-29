@@ -8,6 +8,7 @@ import { AlertaCaducidad } from './AlertaCaducidad';
 import { Router } from '@angular/router';
 // 1. IMPORTANTE: Debes instalarlo con: npm install sweetalert2
 import Swal from 'sweetalert2'; 
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-inventario',
@@ -28,8 +29,8 @@ tipoToast: 'success' | 'error' | 'info' = 'success';
 vistaActual: 'resumen' | 'tabla' = 'resumen';
 mostrarModalEliminar: boolean = false;
 medicamentoAEliminar: any = null;
-  usuarioActivo: string = 'Invitado';
-  medicamentos: any[] = [];
+usuarioActivo: any = { username: '', rol: '' }; 
+ medicamentos: any[] = [];
   mostrarModal = false;
   filtroActual: 'todos' | 'vencidos' | 'proximos' = 'todos';
   terminoBusqueda: string = '';
@@ -42,7 +43,8 @@ medicamentoAEliminar: any = null;
     proximos: 0
   };
   imagenExpandida: string | null = null;
-
+mostrarRegistroModal: boolean = false;
+nuevoUsuario = { username: '', password: '', rol: 'LECTOR' };
   nuevo: Medicamento = {
     nombre: '',
     tipo: '',
@@ -108,6 +110,17 @@ readonly CATALOGO_MAESTRO: { [key: string]: { tipo: string, presentacion: string
   if (datosGuardados) {
     this.nombresMedicamentos = JSON.parse(datosGuardados);
   }
+const data = localStorage.getItem('usuario_actual');
+  if (data) {
+    try {
+      this.usuarioActivo = JSON.parse(data);
+      // Aquí el rol ya debería ser 'LECTOR' si así viene en el JSON
+    } catch (e) {
+      this.usuarioActivo = { username: data, rol: 'PERSONAL' };
+    }
+  }
+  // En tu consola ahora DEBE aparecer: {username: "admin", rol: "ADMIN"} con llaves.
+  console.log("AHORA SÍ ES OBJETO:", this.usuarioActivo);
   }
 
   cargar(): void {
@@ -525,4 +538,39 @@ verImagen(url: string) {
 cerrarImagen() {
   this.imagenExpandida = null;
 }
+
+abrirModalRegistro() {
+  console.log("Intentando abrir modal...");
+  alert("¡El código funciona! Ahora forzaremos la vista."); // <--- Agrega esto
+  this.mostrarRegistroModal = true;
+}
+
+registrarNuevoUsuario() {
+  this.service.registrarUsuario(this.nuevoUsuario).subscribe({
+    next: (res) => {
+      alert("¡Usuario creado!");
+      this.mostrarRegistroModal = false; // Esto cierra el modal automáticamente
+    },
+    error: (err) => alert("Error al registrar")
+  });
+
+
+  console.log("Admin registrando a:", this.nuevoUsuario);
+  
+  this.service.registrarUsuario(this.nuevoUsuario).subscribe({
+    next: (res: any) => { // Agregado :any para evitar error 7006
+      alert('¡Usuario creado correctamente!');
+      this.mostrarRegistroModal = false;
+      this.nuevoUsuario = { username: '', password: '', rol: 'LECTOR' }; 
+    },
+    error: (err: any) => { // Agregado :any para evitar error 7006
+      console.error('Detalle del error:', err);
+      alert('Error al crear usuario. Revisa que el backend esté corriendo.');
+    }
+  });
+}
+// En tu archivo MedicamentoService.ts (o el que estés usando)
+
+// Añade esta función dentro de la clase del servicio:
+
 }
