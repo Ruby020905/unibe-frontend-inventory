@@ -106,28 +106,34 @@ readonly CATALOGO_MAESTRO: { [key: string]: { tipo: string, presentacion: string
   constructor(private service: MedicamentoService, private cdr: ChangeDetectorRef, private router: Router,private http: HttpClient,private loginService: LoginService) {}
 
   ngOnInit(): void {
-    const guardado = localStorage.getItem('usuarioLogueado');
-    if (guardado) { this.usuarioActivo = guardado; }
-    this.cargar();
-    this.cargarAlertas();
-    this.nombresFiltrados = [...this.nombresMedicamentos];
-    this.ordenarListas();
-    const datosGuardados = localStorage.getItem('mis_medicamentos');
-  if (datosGuardados) {
-    this.nombresMedicamentos = JSON.parse(datosGuardados);
-  }
-const data = localStorage.getItem('usuario_actual');
+  // 1. PRIMERO: Identificamos quién es el usuario
+  const data = localStorage.getItem('usuario_actual');
   if (data) {
     try {
       this.usuarioActivo = JSON.parse(data);
-      // Aquí el rol ya debería ser 'LECTOR' si así viene en el JSON
     } catch (e) {
       this.usuarioActivo = { username: data, rol: 'PERSONAL' };
     }
   }
-  // En tu consola ahora DEBE aparecer: {username: "admin", rol: "ADMIN"} con llaves.
-  console.log("AHORA SÍ ES OBJETO:", this.usuarioActivo);
+
+  // 2. SEGUNDO: Solo si hay un usuario válido, cargamos los datos del servidor
+  // Esto evita el error 401 al arrancar sin sesión
+  if (this.usuarioActivo && this.usuarioActivo.username) {
+    this.cargar(); // Ahora sí, con el usuario ya identificado
+    this.cargarAlertas();
+    this.obtenerUsuarios(); // La función que trae la lista de usuarios
   }
+
+  // 3. TERCERO: Configuraciones locales que no dependen del servidor
+  const guardadoMedicamentos = localStorage.getItem('mis_medicamentos');
+  if (guardadoMedicamentos) {
+    this.nombresMedicamentos = JSON.parse(guardadoMedicamentos);
+  }
+  this.nombresFiltrados = [...this.nombresMedicamentos];
+  this.ordenarListas();
+
+  console.log("LOGIN COMPLETADO:", this.usuarioActivo);
+}
 ngAfterViewInit() {
     // Mueve aquí la carga de usuarios
     this.obtenerUsuarios();
