@@ -51,6 +51,7 @@ nuevoUsuario = { username: '', password: '', rol: 'LECTOR' };
 usuarios: any[] = [];
 mostrarEdicionModal: boolean = false;
 usuarioEditando: any = {}
+limiteUsuarios: number = 10; // Puedes cambiar el número aquí
   nuevo: Medicamento = {
     nombre: '',
     tipo: '',
@@ -562,81 +563,115 @@ abrirModalRegistro() {
 }
 
 registrarNuevoUsuario() {
-   this.loginService.getUsuarios().subscribe(data => {
-    this.usuarios = data; // Aquí es donde Angular "refresca" la vista
-  });
-  this.loginService.registrarUsuario(this.nuevoUsuario).subscribe({
-    next: (res) => {
-      this.mostrarFormularioRegistro = false; // Primero cerramos
-  this.obtenerUsuarios();                 // Luego refrescamos
-  alert("¡Usuario registrado con éxito!"); // A
-      // USA EL MISMO NOMBRE QUE EN EL HTML
       this.mostrarFormularioRegistro = false; 
 
-      this.nuevoUsuario = { username: '', password: '', rol: '' };
+  this.loginService.registrarUsuario(this.nuevoUsuario).subscribe({
+    next: (res) => {
+      // 1. CERRAMOS EL MODAL PRIMERO
+      this.mostrarFormularioRegistro = false; 
+
+      // 2. REFRESCAMOS LOS DATOS
       this.obtenerUsuarios();
+
+      // 3. MENSAJE CON DISEÑO (SweetAlert2)
+      Swal.fire({
+        title: '¡Registrado!',
+        text: 'Usuario guardado con éxito',
+        icon: 'success',
+        confirmButtonColor: '#005596', // Tu azul UNIBE
+        timer: 2000 // Se cierra solo en 2 segundos
+      });
+
+      this.nuevoUsuario = { username: '', password: '', rol: '' };
     },
-    error: (err: any) => alert("Error al registrar")
+    error: (err) => {
+      Swal.fire('Error', 'No se pudo registrar', 'error');
+    }
   });
 }
 
 obtenerUsuarios() {
-    this.loginService.getUsuarios().subscribe({
-      next: (data) => this.usuarios = data,
-      error: (err) => console.error("Error al cargar usuarios", err)
-    });
-  }
+  this.loginService.getUsuarios().subscribe({
+    next: (data) => {
+      this.usuarios = data; // Trae la lista completa
+      console.log("Usuarios cargados:", this.usuarios);
+    },
+    error: (err) => console.error("Error al cargar usuarios", err)
+  });
+}
 
   // 3. Crear el método para editar (esto quita el error 'prepararEdicionUsuario')
   prepararEdicionUsuario(user: any) {
+      this.mostrarEdicionModal = true;
      this.usuarioEditando = { ...user }; 
-    this.mostrarEdicionModal = true;
     console.log("Editando a:", user);
-    
-    // Aquí abrirías tu modal de edición
   }
 
   // 4. Crear el método para eliminar (esto quita el error 'eliminarUsuario')
 // En tu Inventario.ts
 eliminarUsuario(id: number) {
-   this.loginService.getUsuarios().subscribe(data => {
-    this.usuarios = data; // Aquí es donde Angular "refresca" la vista
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: "Se eliminará de la base de datos y de esta vista.",
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#005596',
+    confirmButtonText: 'Sí, eliminar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      
+      // 1. Llamamos al servicio para borrar
+      this.loginService.eliminarUsuario(id).subscribe({
+        next: () => {
+          // --- ESTO ES LO QUE SOLUCIONA TU PROBLEMA ---
+          // En lugar de llamar a obtenerUsuarios(), borramos el dato nosotros mismos de la memoria.
+          // Así no dependemos de si la base de datos es lenta o rápida.
+          
+          this.usuarios = [...this.usuarios.filter(u => u.id !== id)];
+          
+          // Opcional: Si tienes un buscador o filtro, asegúrate de actualizar esa lista también
+          // this.usuariosFiltrados = [...this.usuariosFiltrados.filter(u => u.id !== id)];
+
+          console.log("Usuario borrado localmente. No hace falta recargar.");
+
+          Swal.fire({
+            title: '¡Eliminado!',
+            icon: 'success',
+            timer: 1000,
+            showConfirmButton: false
+          });
+        },
+        error: (err) => {
+          console.error("Error al borrar:", err);
+          Swal.fire('Error', 'El servidor no pudo eliminar el usuario', 'error');
+        }
+      });
+    }
   });
-  this.usuarios = this.usuarios.filter(u => u.id !== id);
-  if (confirm('¿Estás seguro de eliminar este usuario?')) {
-    this.loginService.eliminarUsuario(id).subscribe({
-      next: () => {
-        // --- ESTA ES LA CLAVE ---
-        // Al llamar a esta función, Angular va al backend, trae la lista nueva 
-        // (donde ya no está el usuario) y la tabla se actualiza sola.
-        this.obtenerUsuarios(); 
-        
-        alert("Usuario eliminado con éxito");
-      },
-      error: (err: any) => {
-        console.error("Error al eliminar", err);
-        alert("No se pudo eliminar el usuario");
-      }
-    });
-  }
 }
 
 guardarCambiosUsuario() {
-   this.loginService.getUsuarios().subscribe(data => {
-    this.usuarios = data; // Aquí es donde Angular "refresca" la vista
-  });
-  // Llamamos al servicio pasando el ID y el objeto con los nuevos datos
+  // NO llames a getUsuarios aquí arriba.
+  this.mostrarEdicionModal = false;
   this.loginService.actualizarUsuario(this.usuarioEditando.id, this.usuarioEditando).subscribe({
     next: (res) => {
-  this.mostrarFormularioRegistro = false; // 1. Quitar ventana de inmediato
-  this.obtenerUsuarios();                 // 2. Traer la lista nueva
-  alert("Registrado");                    // 3. Avisar al usuario
-},
-    error: (err: any) => {
-      console.error("Error al actualizar:", err);
-      alert("Hubo un error al intentar guardar los cambios.");
+      console.log("Servidor respondió OK");
+      this.obtenerUsuarios();           // Refrescamos la tabla DESPUÉS de cerrar
+      
+      Swal.fire({
+        icon: 'success',
+        title: '¡Actualizado!',
+        confirmButtonColor: '#005596'
+      });
+    },
+    error: (err) => {
+      console.error("El servidor dio error:", err);
+      Swal.fire('Error', 'No se pudo guardar', 'error');
     }
   });
+}
+puedoRegistrar(): boolean {
+  return this.usuarios.length < this.limiteUsuarios;
 }
 }
 
