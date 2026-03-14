@@ -25,6 +25,7 @@
     </div>
 
     <form (ngSubmit)="onLogin()" class="space-y-5">
+      
       <div class="space-y-1">
         <label class="text-[10px] font-black text-[#005596] uppercase ml-1">Usuario</label>
         <input [(ngModel)]="username" name="username" required
@@ -34,15 +35,19 @@
 
       <div class="space-y-1">
         <label class="text-[10px] font-black text-[#005596] uppercase ml-1">Contraseña</label>
-        <input type="password" [(ngModel)]="password" name="password" required
+       <input type="password" 
+       [(ngModel)]="password" 
+       (input)="error = ''" 
+       name="password" 
+       required
                placeholder="••••••••"
                class="w-full p-4 rounded-2xl border-2 border-gray-100 bg-white/50 focus:bg-white focus:border-[#005596] transition-all outline-none text-gray-700 shadow-sm"/>
       </div>
 
-      <button type="submit"
-              class="w-full bg-[#005596] text-white p-4 rounded-2xl font-black text-lg shadow-xl shadow-blue-900/20 hover:bg-[#ffcc00] hover:text-[#005596] active:scale-95 transition-all duration-300">
-        INGRESAR
-      </button>
+     <button type="submit"
+        [disabled]="!username || !password" 
+        class="w-full bg-[#005596] text-white p-4 rounded-2xl font-black text-lg ... transition-all duration-300 disabled:opacity-50">
+{{ isLoading ? 'VALIDANDO...' : 'INGRESAR' }}</button>
     </form>
     
     <div class="mt-10 text-center">

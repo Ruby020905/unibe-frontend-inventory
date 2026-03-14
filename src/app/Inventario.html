@@ -528,23 +528,32 @@
   </div>
 </div>
 
-  <div class="space-y-2 group lg:scale-105 transition-transform">
-    <label class="text-[11px] font-black text-red-600 uppercase tracking-widest ml-2 flex items-center gap-1">
-      <span class="animate-pulse">⚠️</span> Caducidad
-    </label>
-    <input type="date" [(ngModel)]="nuevo.fechaCaducidad" name="fechaCaducidad" [min]="nuevo.fechaIngreso" required 
-      class="w-full p-4 rounded-2xl border-2 border-red-100 bg-red-50 font-black text-red-600 outline-none focus:ring-4 focus:ring-red-100 transition-all shadow-inner">
-    
-    <div *ngIf="nuevo.fechaIngreso && nuevo.fechaCaducidad && nuevo.fechaCaducidad <= nuevo.fechaIngreso" 
-         class="mt-2 flex items-center gap-2 p-3 bg-red-100 border border-red-200 rounded-xl animate__animated animate__headShake">
-      <svg class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-      </svg>
-      <span class="text-[10px] font-black text-red-700 uppercase leading-tight">
-        Error: La caducidad no puede ser anterior o igual al ingreso.
-      </span>
-    </div>
+ <div class="space-y-2 group lg:scale-105 transition-transform">
+  <label class="text-[11px] font-black text-red-600 uppercase tracking-widest ml-2 flex items-center gap-1">
+    <span class="animate-pulse">⚠️</span> Caducidad
+  </label>
+  
+  <input type="date" 
+         [(ngModel)]="nuevo.fechaCaducidad" 
+         (change)="validarFechas()" 
+         name="fechaCaducidad" 
+         [min]="nuevo.fechaIngreso"
+         class="w-full p-4 rounded-2xl border-2 border-red-100 bg-red-50 font-black text-red-600 outline-none focus:ring-4 focus:ring-red-100 transition-all shadow-inner">
+  
+  <div *ngIf="nuevo.fechaIngreso && nuevo.fechaCaducidad && nuevo.fechaCaducidad <= nuevo.fechaIngreso" 
+       class="mt-2 flex items-center gap-2 p-3 bg-red-100 border border-red-200 rounded-xl animate__animated animate__headShake">
+    <span class="text-[10px] font-black text-red-700 uppercase leading-tight">
+      Error: La caducidad no puede ser anterior o igual al ingreso.
+    </span>
   </div>
+
+  <div *ngIf="nuevo.fechaCaducidad && !esCaducidadSegura()" 
+       class="mt-2 flex items-center gap-2 p-3 bg-orange-100 border border-orange-200 rounded-xl animate__animated animate__headShake">
+    <span class="text-[10px] font-black text-orange-700 uppercase leading-tight">
+      ⚠️ Alerta: El medicamento debe tener al menos 10 días de vida útil desde hoy.
+    </span>
+  </div>
+</div>
 
      <div *ngIf="esDuplicado" 
      class="mt-4 p-5 bg-blue-50 border-2 border-blue-200 rounded-[2rem] animate__animated animate__fadeInUp">
@@ -578,8 +587,7 @@
         type="submit" 
         [disabled]="!formularioValido()"
         class="w-full py-5 bg-[#005596] text-white rounded-[2.5rem] font-black uppercase text-xl shadow-xl transition-all disabled:opacity-30 disabled:grayscale">
-  {{ esDuplicado ? 'LOTE DUPLICADO' : 'GUARDAR REGISTRO' }}
-</button> 
+{{ !esCaducidadSegura() ? 'CADUCIDAD PRÓXIMA' : (nuevo.fechaCaducidad <= nuevo.fechaIngreso ? 'FECHA INVÁLIDA' : (esDuplicado ? 'LOTE DUPLICADO' : 'GUARDAR REGISTRO')) }}</button> 
 
     <button *ngIf="nuevo.id" 
             type="button" 

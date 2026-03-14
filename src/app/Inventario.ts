@@ -423,19 +423,24 @@ confirmarActualizacion() {
 validarFechas(): boolean {
   if (!this.nuevo.fechaIngreso || !this.nuevo.fechaCaducidad) return true;
 
-  const ingreso = new Date(this.nuevo.fechaIngreso);
-  const caducidad = new Date(this.nuevo.fechaCaducidad);
-  const salida = this.nuevo.fechaSalida ? new Date(this.nuevo.fechaSalida) : null;
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0); 
 
-  // Validación 1: Caducidad vs Ingreso (Error Crítico)
-  if (caducidad <= ingreso) {
-    this.lanzarToast('La fecha de caducidad debe ser posterior al ingreso', 'error');
+  const caducidad = new Date(this.nuevo.fechaCaducidad);
+  const ingreso = new Date(this.nuevo.fechaIngreso);
+  
+  // 1. Regla de los 10 días desde HOY
+  const diffTime = caducidad.getTime() - hoy.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  if (diffDays <= 10) {
+    this.lanzarToast('El medicamento debe tener al menos 10 días de vida útil desde hoy.', 'error');
     return false;
   }
 
-  // Validación 2: Salida vs Caducidad (Nueva Validación)
-  if (salida && salida > caducidad) {
-    this.lanzarToast('La fecha de salida no puede superar la caducidad', 'error');
+  // 2. Regla de que caducidad > ingreso
+  if (caducidad <= ingreso) {
+    this.lanzarToast('La fecha de caducidad debe ser posterior al ingreso.', 'error');
     return false;
   }
 
@@ -672,6 +677,18 @@ guardarCambiosUsuario() {
 }
 puedoRegistrar(): boolean {
   return this.usuarios.length < this.limiteUsuarios;
+}
+esCaducidadSegura(): boolean {
+  if (!this.nuevo.fechaCaducidad) return true;
+  
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  
+  const caducidad = new Date(this.nuevo.fechaCaducidad);
+  const diffTime = caducidad.getTime() - hoy.getTime();
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+  return diffDays > 10;
 }
 }
 
