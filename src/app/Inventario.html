@@ -216,6 +216,7 @@
     <table class="min-w-full">
       <thead>
         <tr class="bg-[#005596] text-white">
+          <th class="px-6 py-5 text-left text-xs font-black uppercase tracking-widest">N°</th>
           <th class="px-6 py-5 text-left text-xs font-black uppercase tracking-widest">Medicamento</th>
           <th class="px-6 py-5 text-left text-xs font-black uppercase tracking-widest">Clase</th>
           <th class="px-6 py-5 text-center text-xs font-black uppercase tracking-widest">Presentación</th>
@@ -240,7 +241,8 @@
           </td>
         </tr>
 
-        <tr *ngFor="let m of medicamentosPaginados" class="hover:bg-blue-50/50 transition-colors group">
+        <tr *ngFor="let m of medicamentosPaginados;let i = index" class="hover:bg-blue-50/50 transition-colors group" >
+      <td class="font-bold text-gray-500 text-center">{{ i + 1 }}</td>
           <td class="px-6 py-5 font-bold text-gray-800">{{ m.nombre }}</td>
           <td class="px-6 py-5 text-sm text-gray-500 font-medium">{{ m.tipo }}</td>
           <td class="px-6 py-5 text-center font-black text-[#005596]">{{ m.presentacion }}</td>
@@ -589,14 +591,13 @@
         class="w-full py-5 bg-[#005596] text-white rounded-[2.5rem] font-black uppercase text-xl shadow-xl transition-all disabled:opacity-30 disabled:grayscale">
 {{ !esCaducidadSegura() ? 'CADUCIDAD PRÓXIMA' : (nuevo.fechaCaducidad <= nuevo.fechaIngreso ? 'FECHA INVÁLIDA' : (esDuplicado ? 'LOTE DUPLICADO' : 'GUARDAR REGISTRO')) }}</button> 
 
-    <button *ngIf="nuevo.id" 
-            type="button" 
-            (click)="actualizarMedicamento()" 
-            [disabled]="!formularioValido()"
-            class="w-full py-5 bg-[#ffcc00] text-[#005596] rounded-[2.5rem] font-black uppercase text-xl shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95">
-      Confirmar Actualización
-    </button>
-
+   <button *ngIf="nuevo.id" 
+        type="button" 
+        (click)="actualizarMedicamento()" 
+        [disabled]="!formularioValido() || !esCaducidadSegura()|| !validarFechas()"
+        class="w-full py-5 bg-[#ffcc00] text-[#005596] rounded-[2.5rem] font-black uppercase text-xl shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-95">
+    {{ !esCaducidadSegura() ? 'CADUCIDAD PRÓXIMA' : 'CONFIRMAR ACTUALIZACIÓN' }}
+</button>
     <button (click)="cerrarModal()" type="button" class="text-gray-400 font-bold uppercase tracking-widest text-[11px] hover:text-red-500 transition-colors">
       CANCELAR Y VOLVER
     </button>
@@ -791,13 +792,45 @@
                        class="w-full p-3 rounded-xl border-2 border-gray-100 bg-white focus:border-[#005596] transition-all outline-none text-gray-700 shadow-sm text-sm"/>
             </div>
 
-            <div class="space-y-1">
-                <label class="text-[10px] font-black text-[#005596] uppercase ml-1">Contraseña</label>
-                <input type="password" [(ngModel)]="nuevoUsuario.password" name="pass" 
-                       placeholder="••••••••"
-                       class="w-full p-3 rounded-xl border-2 border-gray-100 bg-white focus:border-[#005596] transition-all outline-none text-gray-700 shadow-sm text-sm"/>
-            </div>
+           <div class="space-y-1">
+  <label class="text-[10px] font-black text-[#005596] uppercase ml-1">Contraseña</label>
+  
+  <div class="relative">
+    <input [type]="mostrarPassword ? 'text' : 'password'" 
+           [(ngModel)]="nuevoUsuario.password" 
+           name="pass" 
+           maxlength="16" 
+           placeholder="********"
+           class="w-full p-3 pr-10 rounded-xl border-2 border-gray-100 focus:border-[#005596] transition-all outline-none text-sm shadow-sm"/>
+    
+    <button type="button" 
+            (click)="mostrarPassword = !mostrarPassword"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#005596] focus:outline-none">
+      <i class="fas" [ngClass]="mostrarPassword ? 'fa-eye-slash' : 'fa-eye'"></i>
+    </button>
+  </div>
 
+  <div class="mt-2 grid grid-cols-2 gap-2 p-3 bg-gray-50 rounded-xl border border-gray-100 shadow-inner">
+    <div class="flex items-center gap-2 text-[9px] font-black" [ngClass]="check('[A-Z]') ? 'text-green-600' : 'text-gray-400'">
+      <i class="fas" [ngClass]="check('[A-Z]') ? 'fa-check-circle' : 'fa-circle'"></i> MAYÚSCULA
+    </div>
+    <div class="flex items-center gap-2 text-[9px] font-black" [ngClass]="check('[a-z]') ? 'text-green-600' : 'text-gray-400'">
+      <i class="fas" [ngClass]="check('[a-z]') ? 'fa-check-circle' : 'fa-circle'"></i> MINÚSCULA
+    </div>
+    <div class="flex items-center gap-2 text-[9px] font-black" [ngClass]="check('\\d') ? 'text-green-600' : 'text-gray-400'">
+      <i class="fas" [ngClass]="check('\\d') ? 'fa-check-circle' : 'fa-circle'"></i> NÚMERO
+    </div>
+    <div class="flex items-center gap-2 text-[9px] font-black" [ngClass]="check('[@$!%*?&]') ? 'text-green-600' : 'text-gray-400'">
+      <i class="fas" [ngClass]="check('[@$!%*?&]') ? 'fa-check-circle' : 'fa-circle'"></i> ESPECIAL
+    </div>
+    <div class="flex items-center gap-2 text-[9px] font-black" [ngClass]="check('len') ? 'text-green-600' : 'text-gray-400'">
+      <i class="fas" [ngClass]="check('len') ? 'fa-check-circle' : 'fa-circle'"></i> 8 CARACTERES MÍN.
+    </div>
+    <div class="flex items-center gap-2 text-[9px] font-black text-gray-400">
+      <i class="fas fa-info-circle"></i> MÁX. 16
+    </div>
+  </div>
+</div>
             <div class="space-y-1">
                 <label class="text-[10px] font-black text-[#005596] uppercase ml-1">Asignar Rol</label>
                 <select [(ngModel)]="nuevoUsuario.rol" name="rol" 
@@ -811,7 +844,8 @@
 
         <div class="mt-8 space-y-3">
             <button (click)="registrarNuevoUsuario()" 
-                    class="w-full bg-[#005596] text-white p-3 rounded-xl font-black text-sm shadow-lg hover:bg-[#ffcc00] hover:text-[#005596] active:scale-95 transition-all duration-300 uppercase">
+              [disabled]="!nuevoUsuario.username ||  !esPasswordSegura()"
+                    class=" disabled:opacity-50 disabled:grayscale w-full bg-[#005596] text-white p-3 rounded-xl font-black text-sm shadow-lg hover:bg-[#ffcc00] hover:text-[#005596] active:scale-95 transition-all duration-300 uppercase">
                 GUARDAR REGISTRO
             </button>
 
@@ -832,10 +866,39 @@
                 <input [(ngModel)]="usuarioEditando.username" class="w-full p-3 rounded-xl border-2 border-gray-100 outline-none focus:border-[#005596] disabled:opacity-50"
                 [disabled]="usuarioEditando.username === 'admin'">
             </div>
-            <div>
-                <label class="text-[10px] font-black text-[#005596] uppercase">Nueva Contraseña (Opcional)</label>
-                <input type="password" [(ngModel)]="usuarioEditando.password" placeholder="••••••••" class="w-full p-3 rounded-xl border-2 border-gray-100 outline-none focus:border-[#005596]">
-            </div>
+           <div class="space-y-1">
+    <label class="text-[10px] font-black text-[#005596] uppercase ml-1">Nueva Contraseña (Opcional)</label>
+    
+    <div class="relative flex items-center">
+        <input [type]="mostrarPassEdit ? 'text' : 'password'" 
+               [(ngModel)]="usuarioEditando.password" 
+               placeholder="********" 
+               class="w-full p-3 pr-12 rounded-xl border-2 border-gray-100 outline-none focus:border-[#005596] transition-all text-sm">
+        
+        <button type="button" 
+                (click)="mostrarPassEdit = !mostrarPassEdit"
+                class="absolute right-3 text-gray-400 hover:text-[#005596] focus:outline-none">
+            <i class="fas" [ngClass]="mostrarPassEdit ? 'fa-eye-slash' : 'fa-eye'"></i>
+        </button>
+    </div>
+
+    <div *ngIf="usuarioEditando.password" 
+         class="mt-2 grid grid-cols-2 gap-2 p-3 bg-blue-50/50 rounded-xl border border-blue-100 animate__animated animate__fadeIn">
+        
+        <div class="flex items-center gap-2 text-[9px] font-black" [ngClass]="checkEdit('[A-Z]') ? 'text-green-600' : 'text-gray-400'">
+            <i class="fas" [ngClass]="checkEdit('[A-Z]') ? 'fa-check-circle' : 'fa-circle'"></i> MAYÚSCULA
+        </div>
+        <div class="flex items-center gap-2 text-[9px] font-black" [ngClass]="checkEdit('[a-z]') ? 'text-green-600' : 'text-gray-400'">
+            <i class="fas" [ngClass]="checkEdit('[a-z]') ? 'fa-check-circle' : 'fa-circle'"></i> MINÚSCULA
+        </div>
+        <div class="flex items-center gap-2 text-[9px] font-black" [ngClass]="checkEdit('\\d') ? 'text-green-600' : 'text-gray-400'">
+            <i class="fas" [ngClass]="checkEdit('\\d') ? 'fa-check-circle' : 'fa-circle'"></i> NÚMERO
+        </div>
+        <div class="flex items-center gap-2 text-[9px] font-black" [ngClass]="checkEdit('len') ? 'text-green-600' : 'text-gray-400'">
+            <i class="fas" [ngClass]="checkEdit('len') ? 'fa-check-circle' : 'fa-circle'"></i> 8+ CARACTERES
+        </div>
+    </div>
+</div>
             <div>
                 <label class="text-[10px] font-black text-[#005596] uppercase">Rol</label>
                 <select [(ngModel)]="usuarioEditando.rol" class="w-full p-3 rounded-xl border-2 border-gray-100 outline-none focus:border-[#005596]"

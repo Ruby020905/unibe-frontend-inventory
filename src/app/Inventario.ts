@@ -339,13 +339,23 @@ editarMedicamento(m: any) {
 }
 
 actualizarMedicamento(): void {
+  // 1. Primero la regla de los 10 días (Negocio)
+  if (!this.esCaducidadSegura()) {
+    this.lanzarToast('No se puede actualizar: la caducidad debe ser mayor a 10 días', 'error');
+    return;
+  }
+
+  // 2. Luego la coherencia entre fechas (Ingreso vs Caducidad)
+  if (!this.validarFechas()) {
+    // No hace falta lanzarToast aquí porque validarFechas() ya lo hace
+    return;
+  }
+
   if (!this.nuevo.id) return;
 
-  // Enviamos solo el objeto 'nuevo', el servicio se encargará de poner el ID en la URL
-  this.service.editar(this.nuevo).subscribe({
-    next: () => {
+this.service.editar(this.nuevo).subscribe({
+      next: () => {
         this.cerrarModal(); 
-        // Usamos tu sistema de Toast personalizado
         this.lanzarToast('Registro actualizado con éxito', 'success');
         this.cargar(); 
         this.cargarAlertas(); 
@@ -354,7 +364,6 @@ actualizarMedicamento(): void {
     error: (err) => {
       console.error("Error al actualizar:", err); 
       this.lanzarToast('Error al actualizar registro', 'error');
-      // No cerramos el modal para que el usuario pueda intentar corregir
     }
   });
 }
@@ -689,6 +698,35 @@ esCaducidadSegura(): boolean {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   
   return diffDays > 10;
+}
+esPasswordSegura(): boolean {
+  const pass = this.nuevoUsuario.password;
+  if (!pass) return false;
+  
+  // Explicación del Regex:
+  // (?=.*[a-z]) -> Al menos una minúscula
+  // (?=.*[A-Z]) -> Al menos una mayúscula
+  // (?=.*\d)     -> Al menos un número
+  // (?=.*[@$!%*?&]) -> Al menos un carácter especial
+  // {8,}         -> Mínimo 8 caracteres
+  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  return regex.test(pass);
+}
+mostrarPassword: boolean = false;
+check(regex: string): boolean {
+  if (!this.nuevoUsuario.password) return false;
+  // Si pasamos 'len', verificamos longitud, si no, aplicamos regex
+  if (regex === 'len') return this.nuevoUsuario.password.length >= 8;
+  return new RegExp(regex).test(this.nuevoUsuario.password);
+}
+mostrarPassEdit = false; // Variable única para el modal de edición
+
+// Función check mejorada para que acepte el objeto que estamos editando
+checkEdit(regex: string): boolean {
+  const p = this.usuarioEditando.password;
+  if (!p) return false; // Si está vacío, no marcamos nada
+  if (regex === 'len') return p.length >= 8;
+  return new RegExp(regex).test(p);
 }
 }
 
