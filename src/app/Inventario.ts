@@ -53,6 +53,7 @@ mostrarEdicionModal: boolean = false;
 usuarioEditando: any = {}
 limiteUsuarios: number = 10; // Puedes cambiar el número aquí
 limiteAdmins: number = 3;
+
   nuevo: Medicamento = {
     nombre: '',
     tipo: '',
@@ -105,7 +106,8 @@ readonly CATALOGO_MAESTRO: { [key: string]: { tipo: string, presentacion: string
   'Bellaface': { tipo: 'ANTICONCEPTIVO', presentacion: 'TABLETAS', unidad: 'CAJAS' },
   'Dixi-35': { tipo: 'ANTICONCEPTIVO', presentacion: 'TABLETAS', unidad: 'CAJAS' }
 };
-  constructor(private service: MedicamentoService, private cdr: ChangeDetectorRef, private router: Router,private http: HttpClient,private loginService: LoginService) {}
+  constructor(private service: MedicamentoService, private cdr: ChangeDetectorRef, private router: Router,private http: HttpClient,private loginService: LoginService)
+   {this.nuevo.fechaIngreso = this.fechaHoy;}
 
   ngOnInit(): void {
   // 1. PRIMERO: Identificamos quién es el usuario
@@ -465,8 +467,17 @@ get fechaInvalida(): boolean {
 
 // Nuevo Getter para la alerta naranja de salida
 get salidaInvalida(): boolean {
-  if (!this.nuevo.fechaSalida || !this.nuevo.fechaCaducidad) return false;
-  return new Date(this.nuevo.fechaSalida) > new Date(this.nuevo.fechaCaducidad);
+  // Si falta alguna fecha, no validamos aún
+  if (!this.nuevo.fechaSalida || !this.nuevo.fechaCaducidad || !this.nuevo.fechaIngreso) {
+    return false;
+  }
+
+  const ingreso = new Date(this.nuevo.fechaIngreso);
+  const salida = new Date(this.nuevo.fechaSalida);
+  const caducidad = new Date(this.nuevo.fechaCaducidad);
+
+  // Retorna TRUE si la salida es mayor a la caducidad O si es menor al ingreso
+  return salida > caducidad || salida < ingreso;
 }
 // Verifica si el formulario está listo para ser enviado
 // Verifica si faltan datos o hay errores de fecha
@@ -478,16 +489,7 @@ formularioValido(): boolean {
 return !!(camposObligatorios && fechasValidas && !this.esDuplicado);
 }
 
-// Devuelve el texto informativo para el usuario
-// obtenerMotivoBloqueo(): string {
-//   const n = this.nuevo;
-//   if (this.esDuplicado) return 'Este lote ya existe. Busque el registro y actualice la cantidad.';
-//   if (!n.nombre || !n.tipo || !n.presentacion || !n.unidad || !n.cantidad  || !n.imagen) return 'Complete todos los campos del medicamento';
-//   if (!n.fechaIngreso || !n.fechaCaducidad) return 'Indique las fechas de ingreso y caducidad';
-//   if (this.fechaInvalida) return 'Corrija la fecha de caducidad (debe ser posterior al ingreso)';
-//   if (this.salidaInvalida) return 'Corrija la fecha de salida (no puede superar la caducidad)';
-//   return '';
-// }
+
 get esDuplicado(): boolean {
   if (!this.nuevo.nombre || !this.nuevo.fechaCaducidad || this.nuevo.id) return false;
 
@@ -741,5 +743,15 @@ puedoRegistrarAdmin(): boolean {
   const numAdmins = this.usuarios.filter(u => u.rol === 'ADMIN').length;
   return numAdmins < this.limiteAdmins;
 }
+get mensajeErrorSalida(): string {
+  const ingreso = new Date(this.nuevo.fechaIngreso);
+  const salida = new Date(this.nuevo.fechaSalida);
+  const caducidad = new Date(this.nuevo.fechaCaducidad);
+
+  if (salida < ingreso) return 'La salida no puede ser anterior al ingreso';
+  if (salida > caducidad) return 'La salida no puede ser posterior a la caducidad';
+  return '';
+}
+fechaHoy: string = new Date().toISOString().split('T')[0];
 }
 
