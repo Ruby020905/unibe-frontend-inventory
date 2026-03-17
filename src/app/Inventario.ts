@@ -589,7 +589,8 @@ registrarNuevoUsuario() {
 
       // 2. REFRESCAMOS LOS DATOS
       this.obtenerUsuarios();
-
+      this.mostrarFormularioRegistro = false;
+        this.nuevoUsuario = { username: '', password: '', rol: '' };
       // 3. MENSAJE CON DISEÑO (SweetAlert2)
       Swal.fire({
         title: '¡Registrado!',
@@ -597,7 +598,7 @@ registrarNuevoUsuario() {
         icon: 'success',
         confirmButtonColor: '#005596', // Tu azul UNIBE
         timer: 2000 // Se cierra solo en 2 segundos
-      });
+      })
 
       this.nuevoUsuario = { username: '', password: '', rol: '' };
     },
@@ -610,7 +611,11 @@ registrarNuevoUsuario() {
 obtenerUsuarios() {
   this.loginService.getUsuarios().subscribe({
     next: (data) => {
-      this.usuarios = data; // Trae la lista completa
+      this.usuarios = [...data]; // Paso 1: Vaciamos el arreglo momentáneamente
+      setTimeout(() => {
+        this.usuarios = data; // Paso 2: Asignamos los datos nuevos
+        this.cdr.detectChanges();
+      }, 0); 
       console.log("Usuarios cargados:", this.usuarios);
     },
     error: (err) => console.error("Error al cargar usuarios", err)
@@ -628,45 +633,36 @@ obtenerUsuarios() {
 // En tu Inventario.ts
 eliminarUsuario(id: number) {
   Swal.fire({
-    title: '¿Estás seguro?',
-    text: "Se eliminará de la base de datos y de esta vista.",
+    title: '¿Eliminar usuario?',
+    text: "Esta acción no se puede revertir",
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonColor: '#005596',
-    confirmButtonText: 'Sí, eliminar'
+    confirmButtonColor: '#d33', // Rojo para peligro
+    cancelButtonColor: '#005596', // Azul UNIBE para cancelar
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'No, mantener'
   }).then((result) => {
     if (result.isConfirmed) {
-      
-      // 1. Llamamos al servicio para borrar
       this.loginService.eliminarUsuario(id).subscribe({
         next: () => {
-          // --- ESTO ES LO QUE SOLUCIONA TU PROBLEMA ---
-          // En lugar de llamar a obtenerUsuarios(), borramos el dato nosotros mismos de la memoria.
-          // Así no dependemos de si la base de datos es lenta o rápida.
+          // LA CLAVE: Volver a traer la lista de la DB
+          this.obtenerUsuarios();
           
-          this.usuarios = [...this.usuarios.filter(u => u.id !== id)];
-          
-          // Opcional: Si tienes un buscador o filtro, asegúrate de actualizar esa lista también
-          // this.usuariosFiltrados = [...this.usuariosFiltrados.filter(u => u.id !== id)];
-
-          console.log("Usuario borrado localmente. No hace falta recargar.");
-
           Swal.fire({
             title: '¡Eliminado!',
+            text: 'El usuario ha sido removido del sistema',
             icon: 'success',
-            timer: 1000,
+            timer: 1500,
             showConfirmButton: false
           });
         },
         error: (err) => {
-          console.error("Error al borrar:", err);
-          Swal.fire('Error', 'El servidor no pudo eliminar el usuario', 'error');
+          Swal.fire('Error', 'No se pudo eliminar el usuario', 'error');
         }
       });
     }
   });
 }
-
 guardarCambiosUsuario() {
   // NO llames a getUsuarios aquí arriba.
   this.mostrarEdicionModal = false;
@@ -702,17 +698,12 @@ esCaducidadSegura(): boolean {
   
   return diffDays > 10;
 }
-esPasswordSegura(): boolean {
-  const pass = this.nuevoUsuario.password;
+// Ahora recibe "pass" como argumento
+esPasswordSegura(pass: string): boolean {
   if (!pass) return false;
   
-  // Explicación del Regex:
-  // (?=.*[a-z]) -> Al menos una minúscula
-  // (?=.*[A-Z]) -> Al menos una mayúscula
-  // (?=.*\d)     -> Al menos un número
-  // (?=.*[@$!%*?&]) -> Al menos un carácter especial
-  // {8,}         -> Mínimo 8 caracteres
-  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  // Tu Regex (puedes quitar el carácter especial si no lo pides en el diseño)
+  const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
   return regex.test(pass);
 }
 mostrarPassword: boolean = false;
@@ -753,5 +744,26 @@ get mensajeErrorSalida(): string {
   return '';
 }
 fechaHoy: string = new Date().toISOString().split('T')[0];
+esUsuarioValidoEditar(): boolean {
+  const user = this.usuarioEditando.username;
+  if (!user) return false;
+  return /^[a-zA-Z]{8,16}$/.test(user);
 }
+puedoEditarAdmin(): boolean {
+  // 1. Buscamos al usuario original en la lista para saber qué rol tenía
+  const usuarioOriginal = this.usuarios.find(u => u.id === this.usuarioEditando.id);
+
+  // 2. Si el usuario ya era ADMIN, permitimos que siga siéndolo
+  if (usuarioOriginal && usuarioOriginal.rol === 'ADMIN') {
+    return true;
+  }
+
+  // 3. Si no era ADMIN y queremos cambiarlo a ADMIN, contamos cuántos hay
+  const totalAdmins = this.usuarios.filter(u => u.rol === 'ADMIN').length;
+  
+  // Retorna true si hay menos de 3 (el principal + 2 extras)
+  return totalAdmins < 3;
+}
+}
+
 

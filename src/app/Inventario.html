@@ -872,7 +872,7 @@
 
         <div class="mt-8 space-y-3">
             <button (click)="registrarNuevoUsuario()" 
-        [disabled]="!nuevoUsuario.username || !esUsuarioValido() || !esPasswordSegura() || !puedoRegistrar() || (nuevoUsuario.rol === 'ADMIN' && !puedoRegistrarAdmin())|| salidaInvalida"
+        [disabled]="!nuevoUsuario.username || !esUsuarioValido() || !esPasswordSegura(nuevoUsuario.password) || !puedoRegistrar() || (nuevoUsuario.rol === 'ADMIN' && !puedoRegistrarAdmin())|| salidaInvalida"
         class="disabled:opacity-50 disabled:grayscale w-full bg-[#005596] text-white p-3 rounded-xl font-black text-sm shadow-lg hover:bg-[#ffcc00] hover:text-[#005596] active:scale-95 transition-all duration-300 uppercase">
     GUARDAR REGISTRO
 </button>
@@ -891,15 +891,29 @@
         <div class="space-y-4">
             <div>
                 <label class="text-[10px] font-black text-[#005596] uppercase">Usuario</label>
-                <input [(ngModel)]="usuarioEditando.username" class="w-full p-3 rounded-xl border-2 border-gray-100 outline-none focus:border-[#005596] disabled:opacity-50"
-                [disabled]="usuarioEditando.username === 'admin'">
-            </div>
+                <input [(ngModel)]="usuarioEditando.username" 
+                maxlength="16"
+                class="w-full p-3 rounded-xl border-2 border-gray-100 outline-none focus:border-[#005596] disabled:opacity-50"
+                [disabled]="usuarioEditando.username === 'admin'"
+             [ngClass]="{
+           'border-red-300 bg-red-50': usuarioEditando.username && !esUsuarioValidoEditar(),
+           'border-green-500': esUsuarioValidoEditar()
+         }"
+         class="w-full p-3 rounded-xl border-2 border-gray-100 bg-white focus:border-[#005596] transition-all outline-none text-gray-700 shadow-sm text-sm"/>
+
+  <div *ngIf="usuarioEditando.username && !esUsuarioValidoEditar()" 
+       class="mt-1 flex items-center gap-1 text-[9px] font-bold text-red-600 uppercase">
+    <i class="fas fa-exclamation-circle"></i>
+    <span>Debe tener entre 8 y 16 letras (sin números ni espacios)</span>
+  </div>
+      </div>     
            <div class="space-y-1">
     <label class="text-[10px] font-black text-[#005596] uppercase ml-1">Nueva Contraseña (Opcional)</label>
     
     <div class="relative flex items-center">
         <input [type]="mostrarPassEdit ? 'text' : 'password'" 
-               [(ngModel)]="usuarioEditando.password" 
+               [(ngModel)]="usuarioEditando.password"
+               maxlength="16" 
                placeholder="********" 
                class="w-full p-3 pr-12 rounded-xl border-2 border-gray-100 outline-none focus:border-[#005596] transition-all text-sm">
         
@@ -925,6 +939,9 @@
         <div class="flex items-center gap-2 text-[9px] font-black" [ngClass]="checkEdit('len') ? 'text-green-600' : 'text-gray-400'">
             <i class="fas" [ngClass]="checkEdit('len') ? 'fa-check-circle' : 'fa-circle'"></i> 8+ CARACTERES
         </div>
+         <div class="flex items-center gap-2 text-[9px] font-black text-gray-400">
+      <i class="fas fa-info-circle"></i> MÁX. 16
+    </div>
     </div>
 </div>
             <div>
@@ -933,17 +950,23 @@
                    name="rol" 
             [disabled]="usuarioEditando.username === 'admin'"
             class="w-full p-3 rounded-xl border-2 border-gray-100 bg-white focus:border-[#005596] outline-none text-gray-700 shadow-sm text-sm disabled:bg-gray-100 disabled:cursor-not-allowed">'"
-                  <option value="ADMIN">ADMINISTRADOR</option>
-                    <option value="EDITOR">EDITOR</option>
+ <option value="ADMIN" [disabled]="!puedoEditarAdmin()">
+            ADMINISTRADOR {{ !puedoEditarAdmin() ? '(YA EXISTEN 2 ADMIN)' : '' }}
+        </option>                    <option value="EDITOR">EDITOR</option>
                     <option value="LECTOR">LECTOR</option>
                 </select>
             </div>
         </div>
 
         <div class="mt-8 space-y-3">
-            <button (click)="guardarCambiosUsuario()" class="w-full bg-[#005596] text-white p-3 rounded-xl font-black shadow-lg hover:bg-[#ffcc00] hover:text-[#005596] transition-all uppercase">
-                GUARDAR CAMBIOS
-            </button>
+            <button (click)="guardarCambiosUsuario()" 
+        [disabled]="!usuarioEditando.username || 
+                    !esUsuarioValidoEditar() || 
+                    (usuarioEditando.password ? !esPasswordSegura(usuarioEditando.password) : false) || 
+                    (usuarioEditando.rol === 'ADMIN' && !puedoEditarAdmin())"
+        class="disabled:opacity-50 disabled:grayscale w-full bg-[#005596] text-white p-3 rounded-xl font-black text-sm shadow-lg hover:bg-[#ffcc00] hover:text-[#005596] active:scale-95 transition-all duration-300 uppercase">
+    GUARDAR CAMBIOS
+</button>
             <button (click)="mostrarEdicionModal = false" class="w-full text-gray-400 font-bold text-[10px] uppercase">
                 CANCELAR
             </button>
