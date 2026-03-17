@@ -52,6 +52,7 @@ usuarios: any[] = [];
 mostrarEdicionModal: boolean = false;
 usuarioEditando: any = {}
 limiteUsuarios: number = 10; // Puedes cambiar el número aquí
+limiteAdmins: number = 3;
   nuevo: Medicamento = {
     nombre: '',
     tipo: '',
@@ -727,6 +728,18 @@ checkEdit(regex: string): boolean {
   if (!p) return false; // Si está vacío, no marcamos nada
   if (regex === 'len') return p.length >= 8;
   return new RegExp(regex).test(p);
+}
+
+esUsuarioValido(): boolean {
+  const user = this.nuevoUsuario.username;
+  if (!user) return false;
+  // Regex: Solo letras (A-Z, a-z), mínimo 8, máximo 16
+  const regex = /^[a-zA-Z]{8,16}$/;
+  return regex.test(user);
+}
+puedoRegistrarAdmin(): boolean {
+  const numAdmins = this.usuarios.filter(u => u.rol === 'ADMIN').length;
+  return numAdmins < this.limiteAdmins;
 }
 }
 

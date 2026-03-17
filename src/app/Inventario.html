@@ -785,12 +785,24 @@
         </div>
 
         <div class="space-y-4">
-            <div class="space-y-1">
-                <label class="text-[10px] font-black text-[#005596] uppercase ml-1">Nombre de Usuario</label>
-                <input [(ngModel)]="nuevoUsuario.username" name="user" 
-                       placeholder="ej. ruby.admin"
-                       class="w-full p-3 rounded-xl border-2 border-gray-100 bg-white focus:border-[#005596] transition-all outline-none text-gray-700 shadow-sm text-sm"/>
-            </div>
+           <div class="space-y-1">
+  <label class="text-[10px] font-black text-[#005596] uppercase ml-1">Nombre de Usuario</label>
+  <input [(ngModel)]="nuevoUsuario.username" 
+         name="user" 
+         placeholder="ej. Administrador"
+         maxlength="16"
+         [ngClass]="{
+           'border-red-300 bg-red-50': nuevoUsuario.username && !esUsuarioValido(),
+           'border-green-500': esUsuarioValido()
+         }"
+         class="w-full p-3 rounded-xl border-2 border-gray-100 bg-white focus:border-[#005596] transition-all outline-none text-gray-700 shadow-sm text-sm"/>
+
+  <div *ngIf="nuevoUsuario.username && !esUsuarioValido()" 
+       class="mt-1 flex items-center gap-1 text-[9px] font-bold text-red-600 uppercase">
+    <i class="fas fa-exclamation-circle"></i>
+    <span>Debe tener entre 8 y 16 letras (sin números ni espacios)</span>
+  </div>
+</div>
 
            <div class="space-y-1">
   <label class="text-[10px] font-black text-[#005596] uppercase ml-1">Contraseña</label>
@@ -832,22 +844,26 @@
   </div>
 </div>
             <div class="space-y-1">
-                <label class="text-[10px] font-black text-[#005596] uppercase ml-1">Asignar Rol</label>
-                <select [(ngModel)]="nuevoUsuario.rol" name="rol" 
-                        class="w-full p-3 rounded-xl border-2 border-gray-100 bg-white focus:border-[#005596] transition-all outline-none text-gray-700 shadow-sm text-sm appearance-none cursor-pointer">
-                    <option value="ADMIN">ADMINISTRADOR</option>
-                    <option value="EDITOR">EDITOR</option>
-                    <option value="LECTOR">LECTOR</option>
-                </select>
-            </div>
+    <label class="text-[10px] font-black text-[#005596] uppercase ml-1">Asignar Rol</label>
+    <select [(ngModel)]="nuevoUsuario.rol" name="rol" 
+            class="w-full p-3 rounded-xl border-2 border-gray-100 bg-white focus:border-[#005596] transition-all outline-none text-gray-700 shadow-sm text-sm appearance-none cursor-pointer">
+        
+        <option value="ADMIN" [disabled]="!puedoRegistrarAdmin()">
+            ADMINISTRADOR {{ !puedoRegistrarAdmin() ? '(YA EXISTEN 2 ADMIN)' : '' }}
+        </option>
+        
+        <option value="EDITOR">EDITOR</option>
+        <option value="LECTOR">LECTOR</option>
+    </select>
+</div>
         </div>
 
         <div class="mt-8 space-y-3">
             <button (click)="registrarNuevoUsuario()" 
-              [disabled]="!nuevoUsuario.username ||  !esPasswordSegura()"
-                    class=" disabled:opacity-50 disabled:grayscale w-full bg-[#005596] text-white p-3 rounded-xl font-black text-sm shadow-lg hover:bg-[#ffcc00] hover:text-[#005596] active:scale-95 transition-all duration-300 uppercase">
-                GUARDAR REGISTRO
-            </button>
+        [disabled]="!nuevoUsuario.username || !esUsuarioValido() || !esPasswordSegura() || !puedoRegistrar() || (nuevoUsuario.rol === 'ADMIN' && !puedoRegistrarAdmin())"
+        class="disabled:opacity-50 disabled:grayscale w-full bg-[#005596] text-white p-3 rounded-xl font-black text-sm shadow-lg hover:bg-[#ffcc00] hover:text-[#005596] active:scale-95 transition-all duration-300 uppercase">
+    GUARDAR REGISTRO
+</button>
 
             <button (click)="mostrarFormularioRegistro = false" 
         class="w-full text-gray-400 font-bold text-[10px] uppercase transition-colors">
