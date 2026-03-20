@@ -137,6 +137,8 @@ readonly CATALOGO_MAESTRO: { [key: string]: { tipo: string, presentacion: string
   this.ordenarListas();
 
   console.log("LOGIN COMPLETADO:", this.usuarioActivo);
+  this.fechaHoy = new Date().toLocaleDateString('en-CA');
+  this.nuevo.fechaIngreso = this.fechaHoy;
 }
 ngAfterViewInit() {
     // Mueve aquí la carga de usuarios
@@ -743,7 +745,7 @@ get mensajeErrorSalida(): string {
   if (salida > caducidad) return 'La salida no puede ser posterior a la caducidad';
   return '';
 }
-fechaHoy: string = new Date().toISOString().split('T')[0];
+fechaHoy: string = new Date().toLocaleDateString('en-CA');
 esUsuarioValidoEditar(): boolean {
   const user = this.usuarioEditando.username;
   if (!user) return false;
